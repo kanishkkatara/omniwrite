@@ -1,0 +1,201 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.platformGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.platformBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-base);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  font-family: var(--font-family);
+  color: var(--color-text-secondary);
+  text-align: left;
+}
+
+.platformBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}
+
+.platformBtnActive {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--color-primary-light);
+}
+
+.platformIcon {
+  font-size: 14px;
+}
+
+.sliderWrapper {
+  position: relative;
+}
+
+.sliderLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.sliderLabel {
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+  transition: var(--transition-fast);
+}
+
+.slider::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.7);
+  transform: scale(1.15);
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.toggleLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.toggle {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toggleInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggleSlider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition-base);
+  border: 1px solid var(--color-border);
+}
+
+.toggleSlider::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border-radius: 50%;
+  transition: var(--transition-base);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.toggleInput:checked + .toggleSlider {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.toggleInput:checked + .toggleSlider::before {
+  transform: translateY(-50%) translateX(18px);
+}
+
+.numberInput {
+  width: 80px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  outline: none;
+  text-align: center;
+  transition: var(--transition-base);
+}
+
+.numberInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+.sectionLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}

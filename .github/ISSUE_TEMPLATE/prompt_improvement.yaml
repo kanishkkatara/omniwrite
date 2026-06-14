@@ -1,0 +1,59 @@
+name: Prompt Improvement
+description: Suggest or submit an improvement to a generation prompt
+labels: ["prompt", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Prompt improvements are some of the highest-impact contributions!
+        No Python needed — just edit a YAML file.
+
+  - type: dropdown
+    id: prompt
+    attributes:
+      label: Which prompt?
+      options:
+        - Blog Writer
+        - Reddit Writer
+        - LinkedIn Writer
+        - LinkedIn Comment
+        - Brief Extractor
+        - Strategy Agent
+        - Outline Agent
+        - Editor Agent
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's the problem with the current prompt?
+      description: What kind of output does it produce that could be better?
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current prompt (paste the relevant section)
+      render: yaml
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed improvement
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: example_before
+    attributes:
+      label: Example output BEFORE your change (optional)
+      description: Paste a sample of the current output quality
+
+  - type: textarea
+    id: example_after
+    attributes:
+      label: Example output AFTER your change (optional)
+      description: Paste a sample of the improved output

@@ -1,0 +1,347 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* ─── CSS Custom Properties (Medium Publication Theme) ───────────────────────── */
+:root {
+  /* Colors - Medium Style (Clean Light Theme) */
+  --color-bg: #ffffff;
+  --color-surface: #faf9f6; /* Soft paper tint */
+  --color-surface-2: #f2f0ea;
+  --color-card: #ffffff;
+  --color-card-hover: #faf9f6;
+  --color-primary: #1a8917; /* Medium Signature Green */
+  --color-primary-dark: #156f12;
+  --color-primary-light: #25a522;
+  --color-secondary: #242424; /* Dark charcoal */
+  --color-accent: #1a8917;
+  --color-accent-dark: #156f12;
+  --color-text: #242424;
+  --color-text-secondary: #6b6b6b;
+  --color-muted: #9e9e9e;
+  --color-success: #1a8917;
+  --color-success-light: #25a522;
+  --color-warning: #e07a5f;
+  --color-error: #c94a29;
+  --color-border: #e6e6e6;
+  --color-border-strong: #cccccc;
+  --color-glow-primary: rgba(26, 137, 23, 0.1);
+  --color-glow-accent: rgba(26, 137, 23, 0.05);
+  --color-glow-success: rgba(26, 137, 23, 0.1);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family-serif: 'Lora', Georgia, Cambria, 'Times New Roman', Times, serif; /* Medium body text */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+
+  /* Radii - Minimalist (less rounded, more publication-like) */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows - Flat & Subtle */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.07);
+  --shadow-glow: 0 0 0 3px rgba(26, 137, 23, 0.15);
+  --shadow-glow-accent: 0 0 0 3px rgba(26, 137, 23, 0.1);
+
+  /* Transitions */
+  --transition-fast: all 0.1s ease;
+  --transition-base: all 0.15s ease;
+  --transition-slow: all 0.25s ease;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  line-height: 1.62;
+  overflow: hidden;
+}
+
+/* ─── Scrollbar Styling ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+}
+
+/* ─── Typography ────────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: var(--transition-fast);
+}
+a:hover {
+  color: var(--color-text);
+}
+
+input, textarea, select, button {
+  font-family: var(--font-family);
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────────── */
+
+.glass-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-base);
+}
+
+.glass-card:hover {
+  background: var(--color-card-hover);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+.gradient-text {
+  color: var(--color-text);
+}
+
+.gradient-text-purple {
+  color: var(--color-text-secondary);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  transition: var(--transition-fast);
+}
+
+.badge-primary {
+  background: rgba(26, 137, 23, 0.08);
+  color: var(--color-primary);
+  border: 1px solid rgba(26, 137, 23, 0.2);
+}
+
+.badge-accent {
+  background: rgba(26, 137, 23, 0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.badge-success {
+  background: rgba(26, 137, 23, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(26, 137, 23, 0.2);
+}
+
+.badge-warning {
+  background: rgba(224, 122, 95, 0.1);
+  color: var(--color-warning);
+}
+
+.badge-error {
+  background: rgba(201, 74, 41, 0.1);
+  color: var(--color-error);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-base);
+  box-shadow: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-base);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--color-text);
+  border-color: var(--color-text);
+}
+
+/* ─── Form Elements ─────────────────────────────────────────────────────────── */
+
+.input {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-text);
+  box-shadow: none;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b6b6b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px;
+  padding-right: 36px;
+}
+
+.select option {
+  background: #ffffff;
+  color: var(--color-text);
+}
+
+.select:focus {
+  border-color: var(--color-text);
+}
+
+.textarea {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  transition: var(--transition-base);
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  min-height: 80px;
+}
+
+.textarea:focus {
+  border-color: var(--color-text);
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.99) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Divider ────────────────────────────────────────────────────────────────── */
+
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-4) 0;
+}

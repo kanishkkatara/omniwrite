@@ -1,0 +1,147 @@
+.wrapper {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  animation: fadeIn 0.3s ease;
+}
+
+.progressBar {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.stepRunning {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.stepDone {
+  opacity: 0.7;
+}
+
+.stepError {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.stepPending {
+  opacity: 0.45;
+}
+
+.statusIcon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinnerGlow {
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6));
+}
+
+.checkIcon {
+  color: var(--color-success-light);
+  animation: fadeInScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.errorIcon {
+  color: var(--color-error);
+}
+
+.stepContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.stepName {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.stepMessage {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.currentMessage {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  animation: fadeIn 0.25s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--color-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stepCount {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+}

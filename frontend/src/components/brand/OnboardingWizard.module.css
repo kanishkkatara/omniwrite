@@ -1,0 +1,260 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: #f8f9fa;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  font-family: var(--font-family);
+  color: #1d2129;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9ebf0;
+  flex-shrink: 0;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logoMark {
+  width: 28px;
+  height: 28px;
+  background: #1a8917;
+  color: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.navTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d2129;
+}
+
+.wizardContainer {
+  display: flex;
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 40px auto;
+  background: #ffffff;
+  border: 1px solid #e9ebf0;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  min-height: 600px;
+}
+
+/* Stepper Column */
+.stepperCol {
+  width: 280px;
+  background: #fcfcfc;
+  border-right: 1px solid #e9ebf0;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.stepperTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8792a2;
+  margin-bottom: 8px;
+}
+
+.stepLink {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.stepIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #d0d5dd;
+  color: #667085;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 2;
+  transition: all 0.15s ease;
+}
+
+.stepLinkActive .stepIcon {
+  border-color: #1a8917;
+  background: #1a8917;
+  color: #ffffff;
+}
+
+.stepLinkCompleted .stepIcon {
+  border-color: #1a8917;
+  background: rgba(26, 137, 23, 0.08);
+  color: #1a8917;
+}
+
+.stepDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.stepName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.stepLinkActive .stepName {
+  color: #1d2129;
+}
+
+.stepDesc {
+  font-size: 11px;
+  color: #667085;
+  margin-top: 2px;
+}
+
+/* Form Content Workspace */
+.workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 48px;
+  overflow-y: auto;
+}
+
+.workspaceHeader {
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e9ebf0;
+  padding-bottom: 20px;
+}
+
+.workspaceTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1d2129;
+  letter-spacing: -0.02em;
+}
+
+.workspaceDesc {
+  font-size: 13px;
+  color: #667085;
+  margin-top: 6px;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.fieldGroup label span {
+  color: #c94a29;
+}
+
+.fieldHelp {
+  font-size: 11px;
+  color: #667085;
+  margin-top: 4px;
+}
+
+.perspectiveGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.perspectiveBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.perspectiveBtn:hover {
+  border-color: #98a2b3;
+  background: #fafafa;
+}
+
+.perspectiveBtnActive {
+  border-color: #1a8917;
+  background: rgba(26, 137, 23, 0.03);
+}
+
+.perspectiveTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.perspectiveSub {
+  font-size: 11px;
+  color: #667085;
+  margin-top: 2px;
+}
+
+/* Stepper Connection Lines */
+.stepConnector {
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: -32px;
+  width: 2px;
+  background: #d0d5dd;
+  z-index: 1;
+}
+
+.stepConnectorCompleted {
+  background: #1a8917;
+}
+
+/* Wizard actions footer */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e9ebf0;
+  padding-top: 24px;
+  margin-top: 40px;
+}

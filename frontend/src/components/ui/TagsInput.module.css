@@ -1,0 +1,80 @@
+.tagsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-height: 42px;
+  cursor: text;
+  transition: var(--transition-base);
+}
+
+.tagsContainer:focus-within {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.05);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 10px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-full);
+  color: var(--color-primary-light);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  animation: fadeIn 0.15s ease;
+  transition: var(--transition-fast);
+}
+
+.tag:hover {
+  background: rgba(99, 102, 241, 0.22);
+}
+
+.tagRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: rgba(99, 102, 241, 0.3);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-primary-light);
+  padding: 0;
+  transition: var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.tagRemove:hover {
+  background: rgba(239, 68, 68, 0.5);
+  color: white;
+}
+
+.input {
+  flex: 1;
+  min-width: 100px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family);
+  padding: 2px 2px;
+}
+
+.input::placeholder {
+  color: var(--color-muted);
+}
+
+.hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  margin-top: 4px;
+}

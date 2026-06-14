@@ -1,0 +1,146 @@
+.message {
+  display: flex;
+  gap: var(--space-3);
+  animation: fadeIn 0.2s ease;
+  max-width: 85%;
+}
+
+/* Agent message — left aligned */
+.messageAgent {
+  align-self: flex-start;
+  flex-direction: row;
+}
+
+/* User message — right aligned */
+.messageUser {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.avatarAgent {
+  background: var(--color-primary);
+  color: white;
+}
+
+.avatarUser {
+  background: #242424;
+  color: white;
+}
+
+.bubble {
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  max-width: 100%;
+  position: relative;
+}
+
+.bubbleAgent {
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
+}
+
+.bubbleUser {
+  background: #f2f2f2;
+  border: 1px solid #f2f2f2;
+  border-radius: var(--radius-lg) 0 var(--radius-lg) var(--radius-lg);
+}
+
+.bubbleContent {
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+/* Markdown in agent bubbles */
+.bubbleContent p {
+  margin: 0 0 8px;
+}
+.bubbleContent p:last-child {
+  margin-bottom: 0;
+}
+.bubbleContent strong {
+  color: var(--color-text);
+  font-weight: 600;
+}
+.bubbleContent em {
+  color: var(--color-text-secondary);
+}
+.bubbleContent code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--color-text);
+}
+.bubbleContent ul, .bubbleContent ol {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+.bubbleContent li {
+  margin-bottom: 4px;
+}
+.bubbleContent a {
+  color: var(--color-primary);
+}
+
+.timestamp {
+  font-size: 9px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  text-align: right;
+}
+
+.message:hover .timestamp {
+  opacity: 1;
+}
+
+/* Typing indicator */
+.typingDots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 2px;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  animation: dots 1.4s infinite ease-in-out;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+.messageWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.messageWrapperUser {
+  align-items: flex-end;
+}
+
+.messageWrapperAgent {
+  align-items: flex-start;
+}

@@ -1,0 +1,190 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# omniwrite · Master Configuration
+# Copy this file to config.yaml and fill in your values.
+# All ${ENV_VAR} references are resolved from environment variables / .env
+# ──────────────────────────────────────────────────────────────────────────────
+
+# ── Application ───────────────────────────────────────────────────────────────
+app:
+  name: omniwrite
+  version: "0.1.0"
+  debug: false
+  log_level: INFO          # DEBUG | INFO | WARNING | ERROR
+
+# ── Server ────────────────────────────────────────────────────────────────────
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1               # Increase for production
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:3001"
+
+# ── Database ──────────────────────────────────────────────────────────────────
+database:
+  url: "sqlite+aiosqlite:///./omniwrite.db"   # Dev default
+  # url: "postgresql+asyncpg://user:pass@localhost/omniwrite"  # Postgres
+
+# ── Cache / Queue ─────────────────────────────────────────────────────────────
+redis:
+  url: "redis://localhost:6379/0"
+  enabled: false           # Set true to enable job queue / caching
+
+# ── LLM Models ────────────────────────────────────────────────────────────────
+# Uses LiteLLM — any provider supported by LiteLLM works here.
+# See: https://docs.litellm.ai/docs/providers
+models:
+  # Default test model — fast and cheap for development
+  test:
+    model: "gpt-4.1-nano"
+    temperature: 0.7
+    max_tokens: 4096
+    timeout: 60
+
+  # Production model — highest quality output
+  production:
+    model: "claude-sonnet-4-5"
+    temperature: 0.6
+    max_tokens: 8192
+    timeout: 120
+
+  # Community example: fully local via Ollama (zero API cost)
+  # local:
+  #   model: "ollama/llama3.3"
+  #   base_url: "http://localhost:11434"
+  #   temperature: 0.8
+  #   max_tokens: 4096
+
+  # Community example: ultra-fast via Groq
+  # groq:
+  #   model: "groq/llama-3.3-70b-versatile"
+  #   temperature: 0.7
+  #   max_tokens: 4096
+
+# Per-agent model overrides (optional)
+# Agents not listed here use the global default_mode model.
+agent_models:
+  editor: production       # Always use best model for QA
+  research: test           # Cheap model fine for search parsing
+  brief_extractor: test
+  strategy: test
+  outline: test
+
+# Which mode to use by default: "test" | "production" | "local" | "groq"
+default_mode: test
+
+# ── Search Providers ──────────────────────────────────────────────────────────
+search:
+  # Provider priority order — first available key is used
+  providers:
+    - name: tavily
+      enabled: true
+      api_key: ${TAVILY_API_KEY}
+      max_results: 8
+
+    - name: brave
+      enabled: false
+      api_key: ${BRAVE_SEARCH_API_KEY}
+      max_results: 8
+
+    - name: duckduckgo
+      enabled: true          # Free, no key required — used as fallback
+      max_results: 5
+
+  # Set to false to skip research entirely (use brief only)
+  research_enabled: true
+
+# ── Publishing Integrations ───────────────────────────────────────────────────
+publishers:
+  ghost:
+    enabled: false
+    url: ${GHOST_URL}
+    admin_api_key: ${GHOST_ADMIN_KEY}
+    default_status: draft    # draft | published
+
+  hashnode:
+    enabled: false
+    token: ${HASHNODE_TOKEN}
+    publication_id: ${HASHNODE_PUB_ID}
+    default_tags: []
+
+  wordpress:
+    enabled: false
+    url: ${WORDPRESS_URL}
+    username: ${WORDPRESS_USER}
+    app_password: ${WORDPRESS_APP_PASSWORD}
+    default_status: draft
+
+  devto:
+    enabled: false
+    api_key: ${DEVTO_API_KEY}
+    default_published: false
+
+  notion:
+    enabled: false
+    token: ${NOTION_TOKEN}
+    database_id: ${NOTION_DATABASE_ID}
+
+# ── Generation Defaults ───────────────────────────────────────────────────────
+generation:
+  default_platforms:
+    - blog
+    - linkedin
+    - reddit
+
+  default_language: en
+  supported_languages:
+    - { code: en, name: English }
+    - { code: es, name: Spanish }
+    - { code: de, name: German }
+    - { code: fr, name: French }
+    - { code: pt, name: Portuguese }
+    - { code: ja, name: Japanese }
+    - { code: zh, name: Chinese }
+
+  content_lengths:
+    short:  { min_words: 300,  max_words: 600  }
+    medium: { min_words: 700,  max_words: 1200 }
+    long:   { min_words: 1500, max_words: 2500 }
+
+  default_length: medium
+
+  # Show outline to user before writing (human-in-the-loop)
+  outline_approval_enabled: true
+
+  # Generate N variants for user to choose from (1 = no variants)
+  default_variants: 1
+
+# ── Observability ─────────────────────────────────────────────────────────────
+observability:
+  # LangSmith tracing (https://smith.langchain.com)
+  langsmith:
+    enabled: false
+    api_key: ${LANGCHAIN_API_KEY}
+    project: omniwrite
+
+  # Prometheus metrics endpoint at /metrics
+  prometheus:
+    enabled: true
+
+  # OpenTelemetry OTLP export
+  otlp:
+    enabled: false
+    endpoint: "http://localhost:4317"
+
+  # Show cost breakdown after each generation
+  show_cost_summary: true
+
+# ── Plugins ───────────────────────────────────────────────────────────────────
+plugins:
+  # Directories to scan for community plugins (relative to project root)
+  plugin_dirs:
+    - "backend/plugins"
+    - "~/.omniwrite/plugins"    # User-local plugins
+
+  # Built-in platform plugins (loaded by default)
+  enabled_platforms:
+    - blog
+    - reddit
+    - linkedin
+    - linkedin_comment
