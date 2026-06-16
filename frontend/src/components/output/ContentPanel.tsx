@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import styles from "./ContentPanel.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
 import { regeneratePlatform } from "@/lib/api";
-import { Platform } from "@/types/generation";
+import { Platform, JobStatus } from "@/types/generation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check, RefreshCw, Send, Loader2, Sparkles } from "lucide-react";
@@ -16,6 +16,8 @@ export function ContentPanel() {
     costSummary,
     setOutput,
     platforms: selectedPlatforms,
+    setIsStreaming,
+    setStatus,
   } = useGenerationStore();
 
   const [activeTab, setActiveTab] = useState<Platform>(Platform.Blog);
@@ -60,6 +62,9 @@ export function ContentPanel() {
     if (!currentJobId) return;
     setIsRegenerating(true);
     try {
+      setIsStreaming(true);
+      setStatus(JobStatus.Running);
+
       await regeneratePlatform(currentJobId, activeTab, feedback || undefined);
       setShowFeedbackInput(false);
       setFeedback("");
@@ -71,6 +76,8 @@ export function ContentPanel() {
       });
     } catch (e) {
       console.error("Regeneration failed:", e);
+      setIsStreaming(false);
+      setStatus(JobStatus.Failed);
     } finally {
       setIsRegenerating(false);
     }

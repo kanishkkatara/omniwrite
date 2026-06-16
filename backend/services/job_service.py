@@ -73,9 +73,16 @@ class JobService:
         except json.JSONDecodeError:
             pass
 
+        # Map internal DB status strings to API status strings expected by frontend
+        status = job.status
+        if status in ("done", "completed"):
+            status = "completed"
+        elif status in ("error", "failed"):
+            status = "failed"
+
         return {
             "id": str(job.id),
-            "status": job.status,
+            "status": status,
             "outputs": outputs,
             "outline": state_data.get("outline", ""),
             "steps": state_data.get("steps", []),
@@ -367,10 +374,22 @@ class JobService:
         queue = _event_queues.get(job_id_str)
 
         if queue is None:
-            # Job might be already done — check DB
+            # Job is already done — check DB and emit final event to close client stream
             job_data = await self.get_job(job_id)
             if job_data:
-                yield {"event": "status", "data": job_data}
+                status = job_data.get("status")
+                if status == "completed":
+                    yield {
+                        "event": "job_complete",
+                        "data": {"cost": {"total_cost": job_data.get("total_cost_usd", 0.0)}},
+                    }
+                elif status == "failed":
+                    yield {
+                        "event": "error",
+                        "data": {"message": job_data.get("error") or "Job failed"},
+                    }
+                else:
+                    yield {"event": "status", "data": job_data}
             return
 
         while True:
@@ -433,9 +452,34 @@ class JobService:
                     update={"model": request.production_model}
                 )
 
+        job_id_str = str(job_id)
+        queue: asyncio.Queue = asyncio.Queue()
+        _event_queues[job_id_str] = queue
+
+        await job_store.update_job_status(job_id, "running")
+
         async def _regen():
             try:
+                # Emit initial regeneration step
+                await queue.put(
+                    {
+                        "event": "step_update",
+                        "data": {
+                            "id": f"regen_{platform}",
+                            "name": f"regen_{platform}",
+                            "status": "running",
+                            "message": f"Initiating regeneration for {platform}…",
+                        },
+                    }
+                )
+
+                # Update DB state with running step
                 state = AgentState(**state_data)
+                state.add_step(
+                    f"regen_{platform}", "running", f"Initiating regeneration for {platform}…"
+                )
+                await job_store.update_job_state(job_id, state.model_dump(mode="json"))
+
                 if feedback:
                     # Inject feedback as additional context
                     if state.brief:
@@ -462,14 +506,93 @@ class JobService:
                 mod_path, fn_name = plugin_map[platform]
                 mod = importlib.import_module(mod_path)
                 fn = getattr(mod, fn_name)
+
+                # Emit active writing step
+                await queue.put(
+                    {
+                        "event": "step_update",
+                        "data": {
+                            "id": f"{platform}_writer",
+                            "name": f"{platform}_writer",
+                            "status": "running",
+                            "message": f"Running writer agent for {platform}…",
+                        },
+                    }
+                )
+                state.add_step(
+                    f"{platform}_writer", "running", f"Running writer agent for {platform}…"
+                )
+                await job_store.update_job_state(job_id, state.model_dump(mode="json"))
+
+                # Execute writer
                 state = await fn(state, settings)
+
+                # Update completed steps in state
+                for s in state.steps:
+                    if s.agent == f"regen_{platform}":
+                        s.status = "done"
+                        s.message = f"Regeneration for {platform} completed successfully."
+                    elif s.agent == f"{platform}_writer":
+                        s.status = "done"
+                        s.message = f"Completed generating {platform} content."
+
+                # Emit completion steps
+                await queue.put(
+                    {
+                        "event": "step_update",
+                        "data": {
+                            "id": f"regen_{platform}",
+                            "name": f"regen_{platform}",
+                            "status": "done",
+                            "message": f"Regeneration for {platform} completed successfully.",
+                        },
+                    }
+                )
+                await queue.put(
+                    {
+                        "event": "step_update",
+                        "data": {
+                            "id": f"{platform}_writer",
+                            "name": f"{platform}_writer",
+                            "status": "done",
+                            "message": f"Completed generating {platform} content.",
+                        },
+                    }
+                )
 
                 outputs_json = {k: v.model_dump(mode="json") for k, v in state.outputs.items()}
                 state_dict = state.model_dump(mode="json")
                 await job_store.update_job_outputs(job_id, outputs_json, state_dict)
+                await job_store.update_job_status(job_id, "completed")
+
+                # Emit new content ready and job complete events
+                platform_output = outputs_json.get(platform)
+                if platform_output:
+                    await queue.put({"event": "content_ready", "data": platform_output})
+
+                cost = state_dict.get("cost")
+                await queue.put({"event": "job_complete", "data": {"cost": cost}})
 
             except Exception as exc:  # noqa: BLE001
                 logger.exception("Regenerate %s for job %s failed: %s", platform, job_id, exc)
+                state = AgentState(**state_data)
+                state.add_step(f"regen_{platform}", "error", f"Regeneration failed: {exc}")
+                await job_store.update_job_state(job_id, state.model_dump(mode="json"))
+                await job_store.update_job_status(job_id, "failed", error=str(exc))
+                await queue.put(
+                    {
+                        "event": "step_update",
+                        "data": {
+                            "id": f"regen_{platform}",
+                            "name": f"regen_{platform}",
+                            "status": "error",
+                            "message": f"Regeneration failed: {exc}",
+                        },
+                    }
+                )
+                await queue.put({"event": "error", "data": {"message": str(exc)}})
+            finally:
+                await queue.put(None)
 
         asyncio.create_task(_regen())
         return True

@@ -119,3 +119,26 @@ export interface JobState {
   cost?: GenerationCost | null;
   error?: string;
 }
+
+export interface Message {
+  id: string;
+  role: "user" | "agent";
+  content: string;
+  timestamp: Date;
+  isTyping?: boolean;
+}
+
+export interface GenerationTab {
+  id: string;
+  title: string;
+  currentJobId: string | null;
+  jobStatus: JobStatus | null;
+  steps: AgentStep[];
+  outputs: ContentOutput[];
+  outline: OutlineData | null;
+  costSummary: GenerationCost | null;
+  isStreaming: boolean;
+  error: string | null;
+  topic: string;
+  messages: Message[];
+}

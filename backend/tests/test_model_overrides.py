@@ -97,6 +97,8 @@ async def test_regenerate_platform_model_overrides(mock_acompletion, mock_job_st
 
     mock_job_store.get_job = AsyncMock(return_value=mock_job)
     mock_job_store.update_job_outputs = AsyncMock()
+    mock_job_store.update_job_status = AsyncMock()
+    mock_job_store.update_job_state = AsyncMock()
 
     # Trigger regeneration
     await job_service.regenerate_platform(

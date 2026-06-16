@@ -3,23 +3,29 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "./ChatInterface.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
-import { useJobStream } from "@/lib/hooks/useJobStream";
 import { ChatMessage, Message } from "./ChatMessage";
 import { AgentProgress } from "./AgentProgress";
 import { OutlineApproval } from "./OutlineApproval";
-import { ArrowUp, Sparkles } from "lucide-react";
+import { ArrowUp, Sparkles, Plus, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { JobStatus } from "@/types/generation";
 
 export function ChatInterface() {
-  const { currentJobId, startJob, topic, isStreaming, error, jobStatus, steps, outline, setTopic } =
-    useGenerationStore();
-
-  // Connect job stream side effect (writes directly to the store)
-  useJobStream(currentJobId);
+  const {
+    tabs,
+    activeTabId,
+    addTab,
+    removeTab,
+    setActiveTab,
+    addMessage,
+    setTopic,
+    startJob,
+  } = useGenerationStore();
 
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+  const { messages, steps, jobStatus, outline, currentJobId, error, isStreaming } = activeTab;
 
   // Set up auto-scrolling
   useEffect(() => {
@@ -40,11 +46,11 @@ export function ChatInterface() {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(activeTab.id, userMessage);
     const originalInput = input;
     setInput("");
 
-    // Set topic in Zustand store
+    // Set topic in Zustand store for active tab (also sets tab title)
     setTopic(originalInput);
 
     try {
@@ -57,36 +63,85 @@ export function ChatInterface() {
         content: `I've started the generation pipeline for: **"${originalInput}"**.\n\nRunning agents now...`,
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, agentInitMessage]);
+      addMessage(activeTab.id, agentInitMessage);
     } catch (e: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Math.random().toString(),
-          role: "agent",
-          content: `Sorry, I failed to start the generation: ${e?.message || e || "Unknown error"}`,
-          timestamp: new Date(),
-        },
-      ]);
+      addMessage(activeTab.id, {
+        id: Math.random().toString(),
+        role: "agent",
+        content: `Sorry, I failed to start the generation: ${e?.message || e || "Unknown error"}`,
+        timestamp: new Date(),
+      });
     }
   };
 
   const handleOutlineApproved = () => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Math.random().toString(),
-        role: "agent",
-        content: "Outline approved! Writers have been dispatched to craft the platform posts.",
-        timestamp: new Date(),
-      },
-    ]);
+    addMessage(activeTab.id, {
+      id: Math.random().toString(),
+      role: "agent",
+      content: "Outline approved! Writers have been dispatched to craft the platform posts.",
+      timestamp: new Date(),
+    });
   };
 
   const showWelcome = messages.length === 0;
 
   return (
     <div className={styles.container}>
+      {/* Scrollable Tab Bar */}
+      <div className={styles.tabBar}>
+        <div className={styles.tabsListScrollable}>
+          {tabs.map((tab) => {
+            const isActive = tab.id === activeTabId;
+            return (
+              <button
+                key={tab.id}
+                className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ""}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <div className={styles.tabStatus}>
+                  {tab.isStreaming ? (
+                    <Loader2 size={12} className="animate-spin" style={{ color: "var(--color-primary)" }} />
+                  ) : tab.jobStatus === JobStatus.Completed ? (
+                    <CheckCircle2 size={12} style={{ color: "var(--color-success)" }} />
+                  ) : tab.jobStatus === JobStatus.Failed ? (
+                    <AlertCircle size={12} style={{ color: "var(--color-error)" }} />
+                  ) : (
+                    <div
+                      style={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: "50%",
+                        background: "var(--color-text-secondary)",
+                        opacity: 0.4,
+                      }}
+                    />
+                  )}
+                </div>
+                <span className={styles.tabTitle}>{tab.title || "New Run"}</span>
+                {tabs.length > 1 && (
+                  <span
+                    className={styles.closeBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeTab(tab.id);
+                    }}
+                  >
+                    <X size={10} />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          className={styles.addTabBtn}
+          onClick={() => addTab()}
+          title="Create new generation tab"
+        >
+          <Plus size={14} />
+        </button>
+      </div>
+
       {showWelcome ? (
         <div className={styles.welcome}>
           <div className={styles.welcomeBg} />
@@ -159,7 +214,7 @@ export function ChatInterface() {
         <div className={styles.inputWrapper}>
           <textarea
             className={styles.textarea}
-            placeholder="Type a topic or story, e.g., 'The future of developer tools'..."
+            placeholder="Type a topic or brief, e.g., 'The future of developer tools'..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
