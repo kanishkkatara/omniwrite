@@ -66,10 +66,18 @@
   border-radius: 50%;
 }
 
-.iconSuccess { color: var(--color-success-light); }
-.iconError { color: var(--color-error); }
-.iconInfo { color: var(--color-primary-light); }
-.iconWarning { color: var(--color-warning); }
+.iconSuccess {
+  color: var(--color-success-light);
+}
+.iconError {
+  color: var(--color-error);
+}
+.iconInfo {
+  color: var(--color-primary-light);
+}
+.iconWarning {
+  color: var(--color-warning);
+}
 
 .content {
   flex: 1;

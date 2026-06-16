@@ -5,13 +5,7 @@ import styles from "./GenerationSettingsModal.module.css";
 import { ModelToggle } from "./ModelToggle";
 import { TagsInput } from "@/components/ui/TagsInput";
 import { useGenerationStore } from "@/lib/generationStore";
-import {
-  Platform,
-  ContentLength,
-  ModelMode,
-  ReadingLevel,
-  CtaType,
-} from "@/types/generation";
+import { Platform, ContentLength, ModelMode, ReadingLevel, CtaType } from "@/types/generation";
 import { X, Sliders, Layout, Cpu, Edit3 } from "lucide-react";
 
 const PLATFORM_OPTIONS = [
@@ -77,21 +71,29 @@ export function GenerationSettingsModal() {
 
   // Check if initial models are presets or custom
   const isCustomTestInit = !TEST_MODEL_PRESETS.slice(0, -1).some((m) => m.value === storeTestModel);
-  const isCustomProdInit = !PROD_MODEL_PRESETS.slice(0, -1).some((m) => m.value === storeProductionModel);
+  const isCustomProdInit = !PROD_MODEL_PRESETS.slice(0, -1).some(
+    (m) => m.value === storeProductionModel
+  );
 
-  const [selectedTestPreset, setSelectedTestPreset] = useState<string>(isCustomTestInit ? "custom" : storeTestModel);
-  const [selectedProdPreset, setSelectedProdPreset] = useState<string>(isCustomProdInit ? "custom" : storeProductionModel);
+  const [selectedTestPreset, setSelectedTestPreset] = useState<string>(
+    isCustomTestInit ? "custom" : storeTestModel
+  );
+  const [selectedProdPreset, setSelectedProdPreset] = useState<string>(
+    isCustomProdInit ? "custom" : storeProductionModel
+  );
 
-  const [customTestVal, setCustomTestVal] = useState<string>(isCustomTestInit ? storeTestModel : "");
-  const [customProdVal, setCustomProdVal] = useState<string>(isCustomProdInit ? storeProductionModel : "");
+  const [customTestVal, setCustomTestVal] = useState<string>(
+    isCustomTestInit ? storeTestModel : ""
+  );
+  const [customProdVal, setCustomProdVal] = useState<string>(
+    isCustomProdInit ? storeProductionModel : ""
+  );
 
   const [testModel, setTestModel] = useState<string>(storeTestModel);
   const [productionModel, setProductionModel] = useState<string>(storeProductionModel);
 
   const togglePlatform = (p: Platform) => {
-    setPlatforms((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    );
+    setPlatforms((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]));
   };
 
   const handleTestPresetChange = (val: string) => {
@@ -143,9 +145,7 @@ export function GenerationSettingsModal() {
   };
 
   const lengthValue =
-    contentLength === ContentLength.Short ? 0
-    : contentLength === ContentLength.Medium ? 1
-    : 2;
+    contentLength === ContentLength.Short ? 0 : contentLength === ContentLength.Medium ? 1 : 2;
 
   const lengthOptions = [ContentLength.Short, ContentLength.Medium, ContentLength.Long];
 
@@ -215,7 +215,8 @@ export function GenerationSettingsModal() {
             {/* Content Length */}
             <div className={styles.fieldGroup}>
               <label className={styles.label}>
-                Content Length: <span className={styles.labelValue}>{LENGTH_LABELS[contentLength]}</span>
+                Content Length:{" "}
+                <span className={styles.labelValue}>{LENGTH_LABELS[contentLength]}</span>
               </label>
               <div className={styles.sliderWrapper}>
                 <input
@@ -281,10 +282,7 @@ export function GenerationSettingsModal() {
             {/* Model Mode Toggle */}
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Model Mode</label>
-              <ModelToggle
-                value={modelMode}
-                onChange={setModelMode}
-              />
+              <ModelToggle value={modelMode} onChange={setModelMode} />
             </div>
 
             {/* Model Presets Selection */}
@@ -297,7 +295,9 @@ export function GenerationSettingsModal() {
                   onChange={(e) => handleTestPresetChange(e.target.value)}
                 >
                   {TEST_MODEL_PRESETS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
                   ))}
                 </select>
                 {selectedTestPreset === "custom" && (
@@ -319,7 +319,9 @@ export function GenerationSettingsModal() {
                   onChange={(e) => handleProdPresetChange(e.target.value)}
                 >
                   {PROD_MODEL_PRESETS.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
                   ))}
                 </select>
                 {selectedProdPreset === "custom" && (
@@ -376,7 +378,14 @@ export function GenerationSettingsModal() {
             </div>
 
             {/* SEO Keywords & Variants */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "16px", alignItems: "flex-end" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr auto",
+                gap: "16px",
+                alignItems: "flex-end",
+              }}
+            >
               <div className={styles.fieldGroup}>
                 <label className={styles.label}>SEO Keywords</label>
                 <TagsInput
@@ -394,7 +403,9 @@ export function GenerationSettingsModal() {
                   min={1}
                   max={5}
                   value={variants}
-                  onChange={(e) => setVariants(Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))}
+                  onChange={(e) =>
+                    setVariants(Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))
+                  }
                 />
               </div>
             </div>

@@ -5,13 +5,7 @@ import styles from "./GenerationSettings.module.css";
 import { ModelToggle } from "./ModelToggle";
 import { TagsInput } from "@/components/ui/TagsInput";
 import { useGenerationStore } from "@/lib/generationStore";
-import {
-  Platform,
-  ContentLength,
-  ModelMode,
-  ReadingLevel,
-  CtaType,
-} from "@/types/generation";
+import { Platform, ContentLength, ModelMode, ReadingLevel, CtaType } from "@/types/generation";
 
 const PLATFORM_OPTIONS = [
   { value: Platform.Blog, label: "Blog", icon: "📝" },
@@ -42,16 +36,12 @@ export function GenerationSettings() {
   } = useGenerationStore();
 
   const togglePlatform = (p: Platform) => {
-    const next = platforms.includes(p)
-      ? platforms.filter((x) => x !== p)
-      : [...platforms, p];
+    const next = platforms.includes(p) ? platforms.filter((x) => x !== p) : [...platforms, p];
     setConfigValue("platforms", next);
   };
 
   const lengthValue =
-    contentLength === ContentLength.Short ? 0
-    : contentLength === ContentLength.Medium ? 1
-    : 2;
+    contentLength === ContentLength.Short ? 0 : contentLength === ContentLength.Medium ? 1 : 2;
 
   const lengthOptions = [ContentLength.Short, ContentLength.Medium, ContentLength.Long];
 
@@ -79,13 +69,16 @@ export function GenerationSettings() {
       {/* Content Length */}
       <div className={styles.fieldGroup}>
         <label className={styles.label}>
-          Content Length — <strong style={{ color: "var(--color-text)" }}>{LENGTH_LABELS[contentLength]}</strong>
+          Content Length —{" "}
+          <strong style={{ color: "var(--color-text)" }}>{LENGTH_LABELS[contentLength]}</strong>
         </label>
         <div className={styles.sliderWrapper}>
           <input
             type="range"
             className={styles.slider}
-            min={0} max={2} step={1}
+            min={0}
+            max={2}
+            step={1}
             value={lengthValue}
             onChange={(e) => {
               const v = lengthOptions[parseInt(e.target.value)];
@@ -180,7 +173,9 @@ export function GenerationSettings() {
           <input
             type="range"
             className={styles.slider}
-            min={0} max={100} step={10}
+            min={0}
+            max={100}
+            step={10}
             value={creativity}
             onChange={(e) => setConfigValue("creativity", parseInt(e.target.value))}
           />
@@ -197,9 +192,12 @@ export function GenerationSettings() {
         <input
           type="number"
           className={styles.numberInput}
-          min={1} max={5}
+          min={1}
+          max={5}
           value={variants}
-          onChange={(e) => setConfigValue("variants", Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))}
+          onChange={(e) =>
+            setConfigValue("variants", Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))
+          }
         />
       </div>
 
@@ -207,10 +205,7 @@ export function GenerationSettings() {
       <div className={styles.sectionLabel}>Model Mode</div>
 
       {/* Model Toggle */}
-      <ModelToggle
-        value={modelMode}
-        onChange={(mode) => setConfigValue("modelMode", mode)}
-      />
+      <ModelToggle value={modelMode} onChange={(mode) => setConfigValue("modelMode", mode)} />
     </div>
   );
 }

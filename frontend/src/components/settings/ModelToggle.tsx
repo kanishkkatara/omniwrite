@@ -21,8 +21,18 @@ export function ModelToggle({ value, onChange }: ModelToggleProps) {
           aria-pressed={value === ModelMode.Test}
         >
           <div className={styles.cardHeader}>
-            <span className={styles.cardIcon}><Zap size={14} color={value === ModelMode.Test ? "var(--color-accent)" : "var(--color-muted)"} /></span>
-            <span className={styles.cardLabel} style={{ color: value === ModelMode.Test ? "var(--color-accent)" : "var(--color-text)" }}>
+            <span className={styles.cardIcon}>
+              <Zap
+                size={14}
+                color={value === ModelMode.Test ? "var(--color-accent)" : "var(--color-muted)"}
+              />
+            </span>
+            <span
+              className={styles.cardLabel}
+              style={{
+                color: value === ModelMode.Test ? "var(--color-accent)" : "var(--color-text)",
+              }}
+            >
               TEST
             </span>
           </div>
@@ -38,8 +48,25 @@ export function ModelToggle({ value, onChange }: ModelToggleProps) {
           aria-pressed={value === ModelMode.Production}
         >
           <div className={styles.cardHeader}>
-            <span className={styles.cardIcon}><Sparkles size={14} color={value === ModelMode.Production ? "var(--color-primary-light)" : "var(--color-muted)"} /></span>
-            <span className={styles.cardLabel} style={{ color: value === ModelMode.Production ? "var(--color-primary-light)" : "var(--color-text)" }}>
+            <span className={styles.cardIcon}>
+              <Sparkles
+                size={14}
+                color={
+                  value === ModelMode.Production
+                    ? "var(--color-primary-light)"
+                    : "var(--color-muted)"
+                }
+              />
+            </span>
+            <span
+              className={styles.cardLabel}
+              style={{
+                color:
+                  value === ModelMode.Production
+                    ? "var(--color-primary-light)"
+                    : "var(--color-text)",
+              }}
+            >
               PROD
             </span>
           </div>
@@ -47,9 +74,7 @@ export function ModelToggle({ value, onChange }: ModelToggleProps) {
           <span className={`${styles.cardCost} ${styles.cardProdCost}`}>~$0.05–0.50</span>
         </button>
       </div>
-      <p className={styles.costNote}>
-        Estimated cost per generation run
-      </p>
+      <p className={styles.costNote}>Estimated cost per generation run</p>
     </div>
   );
 }

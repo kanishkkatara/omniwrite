@@ -6,12 +6,7 @@ import { useBrandStore } from "@/lib/brandStore";
 import { VoiceSelector } from "./VoiceSelector";
 import { TagsInput } from "@/components/ui/TagsInput";
 import { useToast, ToastProvider } from "@/components/ui/Toast";
-import {
-  BrandVoice,
-  WritingPerspective,
-  Industry,
-  type BrandProfileCreate,
-} from "@/types/brand";
+import { BrandVoice, WritingPerspective, Industry, type BrandProfileCreate } from "@/types/brand";
 import { Check, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 
 const PERSPECTIVE_OPTIONS = [
@@ -149,7 +144,9 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
         {/* Sidebar Stepper */}
         <div className={styles.stepperCol}>
           <span className={styles.stepperTitle}>Connection Steps</span>
-          <div style={{ display: "flex", flexDirection: "column", gap: "36px", position: "relative" }}>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "36px", position: "relative" }}
+          >
             {steps.map((s, idx) => {
               const isActive = step === s.number;
               const isCompleted = step > s.number;
@@ -188,7 +185,8 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
               <div className={styles.workspaceHeader}>
                 <h2 className={styles.workspaceTitle}>Core Identity</h2>
                 <p className={styles.workspaceDesc}>
-                  Enter the foundation details of the brand context. This shapes the initial content drafts.
+                  Enter the foundation details of the brand context. This shapes the initial content
+                  drafts.
                 </p>
               </div>
               <div className={styles.formGrid}>
@@ -202,7 +200,9 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
                     onChange={(e) => set("name", e.target.value)}
                     placeholder="Acme Corp"
                   />
-                  <span className={styles.fieldHelp}>Used as the brand identifier across content.</span>
+                  <span className={styles.fieldHelp}>
+                    Used as the brand identifier across content.
+                  </span>
                 </div>
                 <div className={styles.fieldGroup}>
                   <label>One-Liner / Tagline</label>
@@ -301,7 +301,9 @@ export function OnboardingWizard({ onClose }: OnboardingWizardProps) {
                     onChange={(e) => set("website_url", e.target.value)}
                     placeholder="https://acme.com"
                   />
-                  <span className={styles.fieldHelp}>Used to scrape context or reference products.</span>
+                  <span className={styles.fieldHelp}>
+                    Used to scrape context or reference products.
+                  </span>
                 </div>
               </div>
             </>

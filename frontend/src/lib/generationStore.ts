@@ -128,7 +128,10 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
       set({ currentJobId: response.job_id, jobStatus: response.status });
       return response.job_id;
     } catch (err) {
-      set({ isStreaming: false, error: err instanceof Error ? err.message : "Failed to start generation job" });
+      set({
+        isStreaming: false,
+        error: err instanceof Error ? err.message : "Failed to start generation job",
+      });
       throw err;
     }
   },
@@ -177,15 +180,16 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
 
   setIsConfigModalOpen: (isConfigModalOpen) => set({ isConfigModalOpen }),
 
-  reset: () => set((state) => ({
-    currentJobId: null,
-    jobStatus: null,
-    steps: [],
-    outputs: [],
-    outline: null,
-    costSummary: null,
-    isStreaming: false,
-    error: null,
-    topic: "",
-  })),
+  reset: () =>
+    set((state) => ({
+      currentJobId: null,
+      jobStatus: null,
+      steps: [],
+      outputs: [],
+      outline: null,
+      costSummary: null,
+      isStreaming: false,
+      error: null,
+      topic: "",
+    })),
 }));

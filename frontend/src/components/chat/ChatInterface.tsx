@@ -11,17 +11,8 @@ import { ArrowUp, Sparkles } from "lucide-react";
 import { JobStatus } from "@/types/generation";
 
 export function ChatInterface() {
-  const {
-    currentJobId,
-    startJob,
-    topic,
-    isStreaming,
-    error,
-    jobStatus,
-    steps,
-    outline,
-    setTopic,
-  } = useGenerationStore();
+  const { currentJobId, startJob, topic, isStreaming, error, jobStatus, steps, outline, setTopic } =
+    useGenerationStore();
 
   // Connect job stream side effect (writes directly to the store)
   useJobStream(currentJobId);
@@ -106,7 +97,8 @@ export function ChatInterface() {
             </div>
             <h1 className={styles.welcomeTitle}>Create Outstanding Content</h1>
             <p className={styles.welcomeSub}>
-              Enter a topic, draft, or brief. The agentic workflow will research, strategize, outline, and write for all your platforms.
+              Enter a topic, draft, or brief. The agentic workflow will research, strategize,
+              outline, and write for all your platforms.
             </p>
             <div className={styles.exampleChips}>
               <button
@@ -117,13 +109,17 @@ export function ChatInterface() {
               </button>
               <button
                 className={styles.exampleChip}
-                onClick={() => handleExampleClick("The ultimate guide to Zustand for state management")}
+                onClick={() =>
+                  handleExampleClick("The ultimate guide to Zustand for state management")
+                }
               >
                 Zustand vs Redux
               </button>
               <button
                 className={styles.exampleChip}
-                onClick={() => handleExampleClick("How to build a top tier open source AI product in 2026")}
+                onClick={() =>
+                  handleExampleClick("How to build a top tier open source AI product in 2026")
+                }
               >
                 OSS AI product
               </button>

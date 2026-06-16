@@ -12,13 +12,7 @@ import { useGenerationStore } from "@/lib/generationStore";
 import { PanelLeft, PanelRight, Loader2, Github } from "lucide-react";
 
 export function ThreePanelLayout() {
-  const {
-    brands,
-    fetchBrands,
-    isLoading,
-    isWizardOpen,
-    setIsWizardOpen,
-  } = useBrandStore();
+  const { brands, fetchBrands, isLoading, isWizardOpen, setIsWizardOpen } = useBrandStore();
   const { isConfigModalOpen } = useGenerationStore();
   const [leftOpen, setLeftOpen] = useState(false);
   const [rightOpen, setRightOpen] = useState(false);
@@ -85,9 +79,7 @@ export function ThreePanelLayout() {
       </header>
 
       <div className={styles.layout}>
-        {anyOpen && (
-          <div className={styles.backdrop} onClick={closeAll} />
-        )}
+        {anyOpen && <div className={styles.backdrop} onClick={closeAll} />}
 
         {/* Left Panel */}
         <div className={`${styles.leftPanel} ${leftOpen ? styles.open : ""}`}>
@@ -108,7 +100,10 @@ export function ThreePanelLayout() {
         <div className={styles.panelToggle} style={{ left: 16 }}>
           <button
             className="btn-ghost"
-            onClick={() => { setLeftOpen((v) => !v); setRightOpen(false); }}
+            onClick={() => {
+              setLeftOpen((v) => !v);
+              setRightOpen(false);
+            }}
             aria-label="Toggle sidebar"
             style={{ padding: "8px" }}
           >
@@ -118,7 +113,10 @@ export function ThreePanelLayout() {
         <div className={styles.panelToggle} style={{ right: 16 }}>
           <button
             className="btn-ghost"
-            onClick={() => { setRightOpen((v) => !v); setLeftOpen(false); }}
+            onClick={() => {
+              setRightOpen((v) => !v);
+              setLeftOpen(false);
+            }}
             aria-label="Toggle output panel"
             style={{ padding: "8px" }}
           >
@@ -129,13 +127,16 @@ export function ThreePanelLayout() {
 
       {/* Full-screen wizard on onboarding or manual trigger */}
       {(showOnboarding || isWizardOpen) && (
-        <OnboardingWizardWithProvider onClose={() => { setIsWizardOpen(false); fetchBrands(); }} />
+        <OnboardingWizardWithProvider
+          onClose={() => {
+            setIsWizardOpen(false);
+            fetchBrands();
+          }}
+        />
       )}
 
       {/* Spacious settings configuration modal */}
-      {isConfigModalOpen && (
-        <GenerationSettingsModal />
-      )}
+      {isConfigModalOpen && <GenerationSettingsModal />}
     </div>
   );
 }

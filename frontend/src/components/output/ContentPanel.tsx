@@ -63,7 +63,7 @@ export function ContentPanel() {
       await regeneratePlatform(currentJobId, activeTab, feedback || undefined);
       setShowFeedbackInput(false);
       setFeedback("");
-      
+
       // Update store state with placeholder while background agents work
       setOutput({
         platform: activeTab,
@@ -175,9 +175,7 @@ export function ContentPanel() {
 
             <div className={styles.contentWrapper}>
               {activeOutput?.content ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {activeOutput.content}
-                </ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{activeOutput.content}</ReactMarkdown>
               ) : (
                 <span className="text-muted italic">Waiting for content generation...</span>
               )}
@@ -190,9 +188,7 @@ export function ContentPanel() {
               <div className={styles.statGroup}>
                 <div className={styles.statItem}>
                   <span className={styles.statLabel}>Model</span>
-                  <span className={styles.statValue}>
-                    {costSummary.model_used || "LiteLLM"}
-                  </span>
+                  <span className={styles.statValue}>{costSummary.model_used || "LiteLLM"}</span>
                 </div>
                 <div className={styles.statItem}>
                   <span className={styles.statLabel}>Latency</span>

@@ -26,7 +26,9 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isAgent = message.role === "agent";
 
   return (
-    <div className={`${styles.messageWrapper} ${isAgent ? styles.messageWrapperAgent : styles.messageWrapperUser}`}>
+    <div
+      className={`${styles.messageWrapper} ${isAgent ? styles.messageWrapperAgent : styles.messageWrapperUser}`}
+    >
       <div className={`${styles.message} ${isAgent ? styles.messageAgent : styles.messageUser}`}>
         {/* Avatar */}
         <div className={`${styles.avatar} ${isAgent ? styles.avatarAgent : styles.avatarUser}`}>
@@ -44,9 +46,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           ) : (
             <div className={styles.bubbleContent}>
               {isAgent ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content}
-                </ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
               ) : (
                 <span>{message.content}</span>
               )}

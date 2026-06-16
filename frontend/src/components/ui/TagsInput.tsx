@@ -43,15 +43,20 @@ export function TagsInput({
   };
 
   return (
-    <div className={`${styles.tagsContainer} ${className ?? ""}`}
-      onClick={() => inputRef.current?.focus()}>
+    <div
+      className={`${styles.tagsContainer} ${className ?? ""}`}
+      onClick={() => inputRef.current?.focus()}
+    >
       {tags.map((tag, i) => (
         <span key={`${tag}-${i}`} className={styles.tag}>
           {tag}
           <button
             type="button"
             className={styles.tagRemove}
-            onClick={(e) => { e.stopPropagation(); removeTag(i); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              removeTag(i);
+            }}
             aria-label={`Remove ${tag}`}
           >
             <X size={8} strokeWidth={3} />
@@ -65,7 +70,9 @@ export function TagsInput({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onBlur={() => { if (inputValue) addTag(inputValue); }}
+          onBlur={() => {
+            if (inputValue) addTag(inputValue);
+          }}
           placeholder={tags.length === 0 ? placeholder : "Add more..."}
           aria-label={placeholder}
         />

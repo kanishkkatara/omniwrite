@@ -5,14 +5,29 @@ import styles from "./BrandSidebar.module.css";
 import { OnboardingWizardWithProvider } from "./OnboardingWizard";
 import { useBrandStore } from "@/lib/brandStore";
 import { useGenerationStore } from "@/lib/generationStore";
-import { ChevronDown, Sparkles, Building2, Settings2, PlusCircle, PenTool, Globe, Tag } from "lucide-react";
+import {
+  ChevronDown,
+  Sparkles,
+  Building2,
+  Settings2,
+  PlusCircle,
+  PenTool,
+  Globe,
+  Tag,
+} from "lucide-react";
 import { ToastProvider } from "@/components/ui/Toast";
 
 // Hash brand name to a consistent color
 function brandColor(name: string): string {
   const colors = [
-    "#1a8917", "#242424", "#06b6d4", "#10b981",
-    "#f59e0b", "#ef4444", "#ec4899", "#3b82f6"
+    "#1a8917",
+    "#242424",
+    "#06b6d4",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+    "#ec4899",
+    "#3b82f6",
   ];
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -30,14 +45,8 @@ function brandInitials(name: string): string {
 }
 
 export function BrandSidebar() {
-  const {
-    brands,
-    activeBrandId,
-    setActiveBrand,
-    fetchBrands,
-    getActiveBrand,
-    setIsWizardOpen,
-  } = useBrandStore();
+  const { brands, activeBrandId, setActiveBrand, fetchBrands, getActiveBrand, setIsWizardOpen } =
+    useBrandStore();
   const {
     reset,
     platforms,
@@ -73,7 +82,9 @@ export function BrandSidebar() {
           >
             <option value="">— No active brand —</option>
             {brands.map((b) => (
-              <option key={b.id} value={b.id}>{b.name}</option>
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
             ))}
           </select>
         </div>
@@ -116,12 +127,21 @@ export function BrandSidebar() {
                     <div style={{ fontSize: "12px", color: "var(--color-text-secondary)" }}>
                       <strong>Tagline:</strong> {activeBrand.tagline || "—"}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontSize: "12px",
+                      }}
+                    >
                       <Tag size={12} className="text-muted" />
                       <span>{activeBrand.industry || "General Industry"}</span>
                     </div>
                     {activeBrand.brand_voice && activeBrand.brand_voice.length > 0 && (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}>
+                      <div
+                        style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "4px" }}
+                      >
                         {activeBrand.brand_voice.map((v) => (
                           <span key={v} className="badge badge-accent">
                             {v}
@@ -140,7 +160,8 @@ export function BrandSidebar() {
                 ) : (
                   <div className={styles.noBrand}>
                     <p style={{ marginBottom: "12px", fontSize: "12px", lineHeight: "1.5" }}>
-                      No brand profile active. Connect a brand profile to align all outputs with your voice.
+                      No brand profile active. Connect a brand profile to align all outputs with
+                      your voice.
                     </p>
                     <button
                       className="btn-primary"
@@ -174,10 +195,10 @@ export function BrandSidebar() {
                           {p === "blog"
                             ? "📝 Blog"
                             : p === "reddit"
-                            ? "🤖 Reddit"
-                            : p === "linkedin"
-                            ? "💼 LinkedIn"
-                            : "💬 Comment"}
+                              ? "🤖 Reddit"
+                              : p === "linkedin"
+                                ? "💼 LinkedIn"
+                                : "💬 Comment"}
                         </span>
                       ))
                     ) : (
@@ -196,11 +217,23 @@ export function BrandSidebar() {
                     <span className={styles.summaryVal} style={{ textTransform: "none" }}>
                       {modelMode === "test" ? (
                         <span style={{ color: "var(--color-accent)", fontWeight: 600 }}>
-                          TEST ({testModel.replace("openai/", "").replace("anthropic/", "").replace("google/", "").replace("groq/", "")})
+                          TEST (
+                          {testModel
+                            .replace("openai/", "")
+                            .replace("anthropic/", "")
+                            .replace("google/", "")
+                            .replace("groq/", "")}
+                          )
                         </span>
                       ) : (
                         <span style={{ color: "var(--color-primary-light)", fontWeight: 600 }}>
-                          PROD ({productionModel.replace("openai/", "").replace("anthropic/", "").replace("google/", "").replace("groq/", "")})
+                          PROD (
+                          {productionModel
+                            .replace("openai/", "")
+                            .replace("anthropic/", "")
+                            .replace("google/", "")
+                            .replace("groq/", "")}
+                          )
                         </span>
                       )}
                     </span>

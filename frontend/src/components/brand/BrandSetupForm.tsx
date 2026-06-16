@@ -6,12 +6,7 @@ import { useBrandStore } from "@/lib/brandStore";
 import { VoiceSelector } from "./VoiceSelector";
 import { TagsInput } from "@/components/ui/TagsInput";
 import { useToast } from "@/components/ui/Toast";
-import {
-  BrandVoice,
-  WritingPerspective,
-  Industry,
-  type BrandProfileCreate,
-} from "@/types/brand";
+import { BrandVoice, WritingPerspective, Industry, type BrandProfileCreate } from "@/types/brand";
 import { CheckCircle, Loader2 } from "lucide-react";
 
 const PERSPECTIVE_OPTIONS = [
@@ -115,7 +110,10 @@ export function BrandSetupForm({ onSaved }: BrandSetupFormProps) {
   return (
     <form
       className={styles.form}
-      onSubmit={(e) => { e.preventDefault(); handleSave(); }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSave();
+      }}
     >
       {/* Name + Tagline */}
       <div className={styles.fieldGroup}>
@@ -149,7 +147,9 @@ export function BrandSetupForm({ onSaved }: BrandSetupFormProps) {
         >
           <option value="">Select industry…</option>
           {INDUSTRY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </select>
       </div>
@@ -225,9 +225,7 @@ export function BrandSetupForm({ onSaved }: BrandSetupFormProps) {
           rows={4}
           maxLength={2000}
         />
-        <div className={styles.charCount}>
-          {(formData.sample_content ?? "").length}/2000
-        </div>
+        <div className={styles.charCount}>{(formData.sample_content ?? "").length}/2000</div>
       </div>
 
       {/* Website URL */}
@@ -267,7 +265,11 @@ export function BrandSetupForm({ onSaved }: BrandSetupFormProps) {
               <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
               Saving…
             </>
-          ) : activeBrand ? "Update Brand" : "Save Brand"}
+          ) : activeBrand ? (
+            "Update Brand"
+          ) : (
+            "Save Brand"
+          )}
         </button>
         {saved && (
           <div className={styles.savedMsg}>

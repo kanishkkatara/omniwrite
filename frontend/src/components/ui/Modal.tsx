@@ -47,7 +47,9 @@ export function Modal({ isOpen, onClose, title, children, footer, maxWidth }: Mo
       >
         {title && (
           <div className={styles.header}>
-            <h2 id="modal-title" className={styles.title}>{title}</h2>
+            <h2 id="modal-title" className={styles.title}>
+              {title}
+            </h2>
             <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
               <X size={16} />
             </button>
@@ -59,7 +61,5 @@ export function Modal({ isOpen, onClose, title, children, footer, maxWidth }: Mo
     </div>
   );
 
-  return typeof document !== "undefined"
-    ? createPortal(content, document.body)
-    : null;
+  return typeof document !== "undefined" ? createPortal(content, document.body) : null;
 }

@@ -108,7 +108,9 @@ export function OutlineApproval({ jobId, outline, onApproved }: OutlineApprovalP
                 <div className={styles.sectionDesc}>{section.description}</div>
               )}
               {section.subsections?.map((sub, j) => (
-                <div key={j} className={styles.subsection}>{sub}</div>
+                <div key={j} className={styles.subsection}>
+                  {sub}
+                </div>
               ))}
             </div>
           ))
@@ -125,9 +127,13 @@ export function OutlineApproval({ jobId, outline, onApproved }: OutlineApprovalP
           disabled={isApproving || isRegenerating}
         >
           {isApproving ? (
-            <><Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Writing…</>
+            <>
+              <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> Writing…
+            </>
           ) : (
-            <><CheckCheck size={14} /> Approve &amp; Write</>
+            <>
+              <CheckCheck size={14} /> Approve &amp; Write
+            </>
           )}
         </button>
 

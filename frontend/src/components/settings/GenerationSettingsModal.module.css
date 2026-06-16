@@ -269,7 +269,7 @@
   cursor: pointer;
   inset: 0;
   background-color: var(--color-border-strong);
-  transition: .2s;
+  transition: 0.2s;
   border-radius: 24px;
 }
 
@@ -281,7 +281,7 @@
   left: 3px;
   bottom: 3px;
   background-color: white;
-  transition: .2s;
+  transition: 0.2s;
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
 }

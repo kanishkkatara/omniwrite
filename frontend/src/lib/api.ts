@@ -1,22 +1,9 @@
-import type {
-  BrandProfile,
-  BrandProfileCreate,
-  BrandProfileUpdate,
-} from "@/types/brand";
-import type {
-  GenerateRequest,
-  GenerateResponse,
-  JobState,
-  JobEvent,
-} from "@/types/generation";
+import type { BrandProfile, BrandProfileCreate, BrandProfileUpdate } from "@/types/brand";
+import type { GenerateRequest, GenerateResponse, JobState, JobEvent } from "@/types/generation";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-async function apiFetch<T>(
-  path: string,
-  options?: RequestInit
-): Promise<T> {
+async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     headers: {
       "Content-Type": "application/json",
@@ -27,9 +14,7 @@ async function apiFetch<T>(
 
   if (!res.ok) {
     const errorText = await res.text();
-    throw new Error(
-      `API error ${res.status} ${res.statusText}: ${errorText}`
-    );
+    throw new Error(`API error ${res.status} ${res.statusText}: ${errorText}`);
   }
 
   return res.json() as Promise<T>;
@@ -37,9 +22,7 @@ async function apiFetch<T>(
 
 // ─── Brand APIs ───────────────────────────────────────────────────────────────
 
-export async function createBrand(
-  data: BrandProfileCreate
-): Promise<BrandProfile> {
+export async function createBrand(data: BrandProfileCreate): Promise<BrandProfile> {
   return apiFetch<BrandProfile>("/api/v1/brands", {
     method: "POST",
     body: JSON.stringify(data),
@@ -54,10 +37,7 @@ export async function getBrand(id: string): Promise<BrandProfile> {
   return apiFetch<BrandProfile>(`/api/v1/brands/${id}`);
 }
 
-export async function updateBrand(
-  id: string,
-  data: BrandProfileUpdate
-): Promise<BrandProfile> {
+export async function updateBrand(id: string, data: BrandProfileUpdate): Promise<BrandProfile> {
   return apiFetch<BrandProfile>(`/api/v1/brands/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -70,9 +50,7 @@ export async function deleteBrand(id: string): Promise<void> {
 
 // ─── Generation APIs ──────────────────────────────────────────────────────────
 
-export async function startGeneration(
-  request: GenerateRequest
-): Promise<GenerateResponse> {
+export async function startGeneration(request: GenerateRequest): Promise<GenerateResponse> {
   return apiFetch<GenerateResponse>("/api/v1/generate", {
     method: "POST",
     body: JSON.stringify(request),
@@ -99,13 +77,10 @@ export async function regeneratePlatform(
   platform: string,
   feedback?: string
 ): Promise<void> {
-  await apiFetch<void>(
-    `/api/v1/jobs/${jobId}/regenerate/${platform}`,
-    {
-      method: "POST",
-      body: JSON.stringify({ feedback }),
-    }
-  );
+  await apiFetch<void>(`/api/v1/jobs/${jobId}/regenerate/${platform}`, {
+    method: "POST",
+    body: JSON.stringify({ feedback }),
+  });
 }
 
 // ─── SSE Streaming ────────────────────────────────────────────────────────────
@@ -115,9 +90,7 @@ export function streamJobEvents(
   onEvent: (event: JobEvent) => void,
   onError?: (error: Event) => void
 ): () => void {
-  const eventSource = new EventSource(
-    `${BASE_URL}/api/v1/jobs/${jobId}/stream`
-  );
+  const eventSource = new EventSource(`${BASE_URL}/api/v1/jobs/${jobId}/stream`);
 
   eventSource.onmessage = (e: MessageEvent) => {
     try {

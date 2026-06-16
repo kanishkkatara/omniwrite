@@ -92,8 +92,7 @@ export const useBrandStore = create<BrandStore>()(
           await api.deleteBrand(id);
           set((state) => ({
             brands: state.brands.filter((b) => b.id !== id),
-            activeBrandId:
-              state.activeBrandId === id ? null : state.activeBrandId,
+            activeBrandId: state.activeBrandId === id ? null : state.activeBrandId,
             isLoading: false,
           }));
         } catch (err) {

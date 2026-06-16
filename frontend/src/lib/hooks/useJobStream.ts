@@ -3,19 +3,18 @@
 import { useEffect, useCallback } from "react";
 import { useGenerationStore } from "@/lib/generationStore";
 import { streamJobEvents, getJob } from "@/lib/api";
-import type { JobEvent, AgentStep, ContentOutput, GenerationCost, OutlineData } from "@/types/generation";
+import type {
+  JobEvent,
+  AgentStep,
+  ContentOutput,
+  GenerationCost,
+  OutlineData,
+} from "@/types/generation";
 import { JobStatus, AgentStepStatus } from "@/types/generation";
 
 export function useJobStream(jobId: string | null) {
-  const {
-    updateStep,
-    setOutline,
-    setOutput,
-    setStatus,
-    setCost,
-    setIsStreaming,
-    setError,
-  } = useGenerationStore();
+  const { updateStep, setOutline, setOutput, setStatus, setCost, setIsStreaming, setError } =
+    useGenerationStore();
 
   const handleEvent = useCallback(
     (event: JobEvent) => {
@@ -112,10 +111,7 @@ export function useJobStream(jobId: string | null) {
           }
           if (job.outline) setOutline(job.outline);
           if (job.cost) setCost(job.cost);
-          if (
-            job.status === JobStatus.Completed ||
-            job.status === JobStatus.Failed
-          ) {
+          if (job.status === JobStatus.Completed || job.status === JobStatus.Failed) {
             if (pollInterval) clearInterval(pollInterval);
             setIsStreaming(false);
             if (job.status === JobStatus.Failed && job.error) {
@@ -132,5 +128,15 @@ export function useJobStream(jobId: string | null) {
       if (cleanup) cleanup();
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [jobId, handleEvent, updateStep, setOutline, setOutput, setStatus, setCost, setIsStreaming, setError]);
+  }, [
+    jobId,
+    handleEvent,
+    updateStep,
+    setOutline,
+    setOutput,
+    setStatus,
+    setCost,
+    setIsStreaming,
+    setError,
+  ]);
 }

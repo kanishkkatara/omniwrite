@@ -36,7 +36,7 @@ export function AgentProgress({ steps }: AgentProgressProps) {
   const getLogTime = (idx: number) => {
     const time = new Date();
     time.setSeconds(time.getSeconds() - (steps.length - idx) * 3);
-    return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   };
 
   return (
@@ -74,7 +74,9 @@ export function AgentProgress({ steps }: AgentProgressProps) {
             <span className={styles.barLabel}>Progress:</span>
             <span className={styles.bar}>[{asciiBar}]</span>
             <span className={styles.pct}>{progressPct}%</span>
-            <span className={styles.count}>({doneCount}/{totalCount})</span>
+            <span className={styles.count}>
+              ({doneCount}/{totalCount})
+            </span>
           </div>
 
           <div className={styles.divider} />
@@ -117,7 +119,15 @@ export function AgentProgress({ steps }: AgentProgressProps) {
             {/* Pulsing prompt cursor at the bottom if pipeline is running */}
             {progressPct < 100 && (
               <div className={styles.cursorLine}>
-                <span className={styles.timestamp}>[{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}]</span>
+                <span className={styles.timestamp}>
+                  [
+                  {new Date().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                  ]
+                </span>
                 <span className={styles.promptSymbol}>&gt;</span>
                 <span className={styles.pulseCursor}>█</span>
               </div>
