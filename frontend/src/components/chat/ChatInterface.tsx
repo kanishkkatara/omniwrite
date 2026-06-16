@@ -5,9 +5,9 @@ import styles from "./ChatInterface.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
 import { ChatMessage, Message } from "./ChatMessage";
 import { AgentProgress } from "./AgentProgress";
-import { OutlineApproval } from "./OutlineApproval";
 import { ArrowUp, Sparkles, Plus, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { JobStatus } from "@/types/generation";
+import { JobStatus, Platform } from "@/types/generation";
+import { regeneratePlatform } from "@/lib/api";
 
 export function ChatInterface() {
   const {
@@ -19,6 +19,10 @@ export function ChatInterface() {
     addMessage,
     setTopic,
     startJob,
+    setIsStreaming,
+    setStatus,
+    setOutput,
+    connectTabStream,
   } = useGenerationStore();
 
   const [input, setInput] = useState("");
@@ -26,6 +30,26 @@ export function ChatInterface() {
 
   const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
   const { messages, steps, jobStatus, outline, currentJobId, error, isStreaming } = activeTab;
+
+  const activePlatform = activeTab.activePlatform || Platform.Blog;
+  const platformLabels: Record<Platform, string> = {
+    [Platform.Blog]: "Blog Post",
+    [Platform.Reddit]: "Reddit Adapt",
+    [Platform.LinkedIn]: "LinkedIn Post",
+    [Platform.LinkedInComment]: "First Comment",
+  };
+  const activePlatformLabel = platformLabels[activePlatform] || activePlatform;
+
+  const isInputDisabled = !input.trim() || isStreaming || jobStatus === JobStatus.AwaitingOutlineApproval;
+
+  const placeholderText =
+    jobStatus === JobStatus.AwaitingOutlineApproval
+      ? "Please review and approve the outline in the right panel first..."
+      : isStreaming
+      ? "AI is writing... Please wait."
+      : currentJobId
+      ? `Ask for changes to the active platform content (${activePlatformLabel})...`
+      : "Type a topic or brief, e.g., 'The future of developer tools'...";
 
   // Set up auto-scrolling
   useEffect(() => {
@@ -37,7 +61,7 @@ export function ChatInterface() {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isStreaming) return;
+    if (!input.trim() || isStreaming || jobStatus === JobStatus.AwaitingOutlineApproval) return;
 
     const userMessage: Message = {
       id: Math.random().toString(),
@@ -50,6 +74,55 @@ export function ChatInterface() {
     const originalInput = input;
     setInput("");
 
+    // If currentJobId exists, treat the send action as platform regeneration feedback
+    if (currentJobId) {
+      const activePlatform = activeTab.activePlatform || Platform.Blog;
+      const platformLabels: Record<Platform, string> = {
+        [Platform.Blog]: "Blog Post",
+        [Platform.Reddit]: "Reddit Adapt",
+        [Platform.LinkedIn]: "LinkedIn Post",
+        [Platform.LinkedInComment]: "First Comment",
+      };
+      const activePlatformLabel = platformLabels[activePlatform] || activePlatform;
+
+      try {
+        setIsStreaming(true);
+        setStatus(JobStatus.Running);
+
+        // Update store state with placeholder while background agents work
+        setOutput({
+          platform: activePlatform,
+          content: "*Regenerating content based on feedback... Please wait.*",
+        });
+
+        // Add feedback initiation message to chat
+        const agentInitMessage: Message = {
+          id: Math.random().toString(),
+          role: "agent",
+          content: `I'm revising the **${activePlatformLabel}** content based on your feedback: "${originalInput}"...`,
+          timestamp: new Date(),
+        };
+        addMessage(activeTab.id, agentInitMessage);
+
+        // Call regenerate API
+        await regeneratePlatform(currentJobId, activePlatform, originalInput);
+
+        // Start background SSE/polling stream
+        connectTabStream(activeTab.id, currentJobId);
+      } catch (e: any) {
+        setIsStreaming(false);
+        setStatus(JobStatus.Failed);
+        addMessage(activeTab.id, {
+          id: Math.random().toString(),
+          role: "agent",
+          content: `Failed to revise content: ${e?.message || e || "Unknown error"}`,
+          timestamp: new Date(),
+        });
+      }
+      return;
+    }
+
+    // Otherwise, this is a new job (start first time)
     // Set topic in Zustand store for active tab (also sets tab title)
     setTopic(originalInput);
 
@@ -74,14 +147,7 @@ export function ChatInterface() {
     }
   };
 
-  const handleOutlineApproved = () => {
-    addMessage(activeTab.id, {
-      id: Math.random().toString(),
-      role: "agent",
-      content: "Outline approved! Writers have been dispatched to craft the platform posts.",
-      timestamp: new Date(),
-    });
-  };
+
 
   const showWelcome = messages.length === 0;
 
@@ -190,14 +256,7 @@ export function ChatInterface() {
           {/* Render Active Job Status & Progress */}
           {steps.length > 0 && <AgentProgress steps={steps} />}
 
-          {/* Human-in-the-loop outline approval */}
-          {jobStatus === JobStatus.AwaitingOutlineApproval && outline && currentJobId && (
-            <OutlineApproval
-              jobId={currentJobId}
-              outline={outline}
-              onApproved={handleOutlineApproved}
-            />
-          )}
+
 
           {error && (
             <div className="alert alert-error" style={{ margin: "12px 0" }}>
@@ -214,9 +273,10 @@ export function ChatInterface() {
         <div className={styles.inputWrapper}>
           <textarea
             className={styles.textarea}
-            placeholder="Type a topic or brief, e.g., 'The future of developer tools'..."
+            placeholder={placeholderText}
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={isStreaming || jobStatus === JobStatus.AwaitingOutlineApproval}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -228,7 +288,7 @@ export function ChatInterface() {
             <button
               className={styles.sendBtn}
               onClick={handleSend}
-              disabled={!input.trim() || isStreaming}
+              disabled={isInputDisabled}
             >
               <ArrowUp size={18} />
             </button>

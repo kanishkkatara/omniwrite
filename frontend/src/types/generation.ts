@@ -141,4 +141,5 @@ export interface GenerationTab {
   error: string | null;
   topic: string;
   messages: Message[];
+  activePlatform: Platform;
 }

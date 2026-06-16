@@ -79,7 +79,7 @@ export async function regeneratePlatform(
 ): Promise<void> {
   await apiFetch<void>(`/api/v1/jobs/${jobId}/regenerate/${platform}`, {
     method: "POST",
-    body: JSON.stringify({ feedback }),
+    body: JSON.stringify({ platform, feedback }),
   });
 }
 

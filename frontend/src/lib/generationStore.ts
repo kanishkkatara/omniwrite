@@ -101,6 +101,7 @@ const createNewTab = (id?: string, title: string = "New Generation"): Generation
     error: null,
     topic: "",
     messages: [],
+    activePlatform: Platform.Blog,
   };
 };
 
@@ -236,6 +237,7 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
       topic: "",
       messages: [],
       title: "New Generation",
+      activePlatform: Platform.Blog,
     });
   },
 

@@ -5,22 +5,34 @@ import styles from "./ContentPanel.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
 import { regeneratePlatform } from "@/lib/api";
 import { Platform, JobStatus } from "@/types/generation";
+import { OutlineApproval } from "@/components/chat/OutlineApproval";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check, RefreshCw, Send, Loader2, Sparkles } from "lucide-react";
 
 export function ContentPanel() {
   const {
-    currentJobId,
-    outputs,
-    costSummary,
+    tabs,
+    activeTabId,
     setOutput,
     platforms: selectedPlatforms,
     setIsStreaming,
     setStatus,
+    connectTabStream,
+    addMessage,
+    updateTab,
   } = useGenerationStore();
 
-  const [activeTab, setActiveTab] = useState<Platform>(Platform.Blog);
+  const activeGenerationTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
+  const { currentJobId, outputs, costSummary, outline, jobStatus, activePlatform } = activeGenerationTab;
+
+  const activeTab = activePlatform || Platform.Blog;
+
+  const setActiveTab = (platform: Platform) => {
+    updateTab(activeGenerationTab.id, { activePlatform: platform });
+    setShowFeedbackInput(false);
+  };
+
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -74,6 +86,9 @@ export function ContentPanel() {
         platform: activeTab,
         content: "*Regenerating content based on feedback... Please wait.*",
       });
+
+      // Connect SSE stream to receive live updates during regeneration
+      connectTabStream(activeGenerationTab.id, currentJobId);
     } catch (e) {
       console.error("Regeneration failed:", e);
       setIsStreaming(false);
@@ -83,15 +98,34 @@ export function ContentPanel() {
     }
   };
 
+  const handleOutlineApproved = () => {
+    addMessage(activeGenerationTab.id, {
+      id: Math.random().toString(),
+      role: "agent",
+      content: "Outline approved! Writers have been dispatched to craft the platform posts.",
+      timestamp: new Date(),
+    });
+  };
+
   const hasOutputs = outputs.length > 0;
 
   return (
     <div className={styles.panel}>
       <div className={styles.header}>
-        <div className={styles.title}>Generated Content</div>
+        <div className={styles.title}>
+          {jobStatus === JobStatus.AwaitingOutlineApproval ? "Content Outline" : "Generated Content"}
+        </div>
       </div>
 
-      {!hasOutputs ? (
+      {jobStatus === JobStatus.AwaitingOutlineApproval && outline && currentJobId ? (
+        <div className={styles.scrollArea}>
+          <OutlineApproval
+            jobId={currentJobId}
+            outline={outline}
+            onApproved={handleOutlineApproved}
+          />
+        </div>
+      ) : !hasOutputs ? (
         <div className={styles.emptyState}>
           <div className={styles.emptyIcon}>
             <Sparkles size={20} className="text-muted" />
