@@ -197,3 +197,154 @@ async def regenerate_platform(
         "status": "regenerating",
         "message": f"Regenerating {platform.value}. Poll GET /jobs/{job_id} for updates.",
     }
+
+
+from pydantic import BaseModel
+
+from fastapi.responses import StreamingResponse
+
+class ChatRequest(BaseModel):
+    message: str
+    active_platform: str
+
+
+@router.post(
+    "/{job_id}/chat",
+    summary="Chat with generated content or request edits",
+)
+async def chat_with_content(
+    job_id: UUID,
+    payload: ChatRequest,
+) -> StreamingResponse:
+    """
+    Handles conversational questions about the content or revision commands.
+    Automatically classifies the message:
+    - If user requests changes (e.g. rewrite, make it shorter, edit),
+      initiates background platform regeneration and returns response_type="update".
+    - If user asks a question, answers it directly and returns response_type="chat".
+    """
+    from backend.core.llm_factory import llm_call
+    from backend.models.request import ModelMode
+    from backend.services.storage import job_store
+    import litellm
+    from litellm import acompletion
+
+    job = await job_store.get_job(job_id)
+    if not job:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Job {job_id} not found",
+        )
+
+    import json
+    request_data = json.loads(job.request_json) if job.request_json else {}
+    topic = request_data.get("topic", "")
+    outputs = json.loads(job.outputs_json) if job.outputs_json else {}
+    state_data = json.loads(job.state_json) if job.state_json else {}
+    outline = state_data.get("outline", "")
+
+    classification_prompt = f"""You are analyzing a user's follow-up message in OmniWrite, an AI content generation tool.
+The user is viewing a content generation project:
+- Topic: {topic}
+- Outline: {outline}
+- Active Platform: {payload.active_platform}
+- Generated Platform Content: {outputs.get(payload.active_platform, 'None')}
+
+The user sent this message:
+"{payload.message}"
+
+Please determine if the user wants to UPDATE, REWRITE, REGENERATE, EDIT, or CHANGE the generated content (e.g., "rewrite the intro", "make it longer", "add a section about X", "change the title to funny").
+Or if they are just asking a QUESTION, seeking explanation, commenting generally, or chatting (e.g., "what points did you cover?", "why did you choose this title?", "can you summarize the reddit post?", "looks good").
+
+Output your analysis in this EXACT format:
+[CLASSIFICATION] UPDATE
+or
+[CLASSIFICATION] CHAT
+[ANSWER] Your helpful conversational answer to the user's message using the context above.
+"""
+
+    try:
+        response_text, _, _, _ = await llm_call(
+            messages=[{"role": "user", "content": classification_prompt}],
+            agent_name=None,
+            model_mode=ModelMode.TEST,
+        )
+    except Exception as e:
+        logger.error(f"Chat LLM call failed: {e}")
+        response_text = "[CLASSIFICATION] CHAT\n[ANSWER] I'm sorry, I was unable to process that chat request."
+
+    lines = response_text.strip().split("\n")
+    classification = "CHAT"
+    content_answer = ""
+
+    for line in lines:
+        if line.startswith("[CLASSIFICATION]"):
+            cls_val = line.replace("[CLASSIFICATION]", "").strip().upper()
+            if cls_val in ("UPDATE", "CHAT"):
+                classification = cls_val
+        elif line.startswith("[ANSWER]"):
+            content_answer = line.replace("[ANSWER]", "").strip()
+            idx = response_text.find("[ANSWER]")
+            if idx != -1:
+                content_answer = response_text[idx + len("[ANSWER]"):].strip()
+            break
+
+    if not classification or (classification == "CHAT" and not content_answer):
+        lower_resp = response_text.lower()
+        if any(w in lower_resp for w in ["update", "rewrite", "regenerate", "make it", "change the"]):
+            classification = "UPDATE"
+        else:
+            classification = "CHAT"
+            content_answer = response_text.replace("[CLASSIFICATION]", "").replace("[ANSWER]", "").strip()
+
+    if classification == "UPDATE":
+        await job_service.regenerate_platform(
+            job_id=job_id,
+            platform=payload.active_platform,
+            feedback=payload.message,
+        )
+        async def update_generator():
+            yield json.dumps({"response_type": "update", "content": ""}) + "\n"
+        return StreamingResponse(update_generator(), media_type="text/event-stream")
+    else:
+        async def chat_generator():
+            chat_prompt = f"""You are an AI assistant for OmniWrite. Answer the user's question.
+Topic: {topic}
+Outline: {outline}
+Active Platform: {payload.active_platform}
+Generated Content: {outputs.get(payload.active_platform, 'None')}
+
+User Question: {payload.message}
+Answer helpfully and concisely.
+"""
+            from backend.core.config import get_settings
+            from backend.core.llm_factory import _inject_api_keys
+            settings = get_settings()
+            _inject_api_keys(settings)
+            model_cfg = settings.get_model_config(None)
+
+            kwargs = {
+                "model": model_cfg.model,
+                "messages": [{"role": "user", "content": chat_prompt}],
+                "temperature": model_cfg.temperature,
+                "max_tokens": model_cfg.max_tokens,
+                "timeout": model_cfg.timeout,
+                "stream": True,
+            }
+            if model_cfg.base_url:
+                kwargs["base_url"] = model_cfg.base_url
+
+            try:
+                # Signal CHAT response start
+                yield json.dumps({"response_type": "chat", "content": ""}) + "\n"
+
+                response = await acompletion(**kwargs)
+                async for chunk in response:
+                    delta = chunk.choices[0].delta.content or ""
+                    if delta:
+                        yield json.dumps({"response_type": "chat", "content": delta}) + "\n"
+            except Exception as e:
+                logger.error(f"Streaming LLM call failed: {e}")
+                yield json.dumps({"response_type": "chat", "content": "\n[Error occurred during streaming]"}) + "\n"
+
+        return StreamingResponse(chat_generator(), media_type="text/event-stream")

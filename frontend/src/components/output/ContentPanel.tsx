@@ -28,6 +28,14 @@ export function ContentPanel() {
 
   const activeTab = activePlatform || Platform.Blog;
 
+  const platformLabels: Record<Platform, string> = {
+    [Platform.Blog]: "Blog Post",
+    [Platform.Reddit]: "Reddit Adapt",
+    [Platform.LinkedIn]: "LinkedIn Post",
+    [Platform.LinkedInComment]: "First Comment",
+  };
+  const activePlatformLabel = platformLabels[activeTab] || activeTab;
+
   const setActiveTab = (platform: Platform) => {
     updateTab(activeGenerationTab.id, { activePlatform: platform });
     setShowFeedbackInput(false);
@@ -77,6 +85,26 @@ export function ContentPanel() {
       setIsStreaming(true);
       setStatus(JobStatus.Running);
 
+      const feedbackText = feedback || "Regenerate platform post";
+      const userMessage = {
+        id: Math.random().toString(),
+        role: "user" as const,
+        content: feedbackText,
+        timestamp: new Date(),
+      };
+      const typingMsgId = `typing-${Date.now()}`;
+      const agentMessage = {
+        id: typingMsgId,
+        role: "agent" as const,
+        content: `I'm revising the **${activePlatformLabel}** content based on your feedback: "${feedbackText}"...`,
+        timestamp: new Date(),
+        isTyping: true,
+      };
+
+      addMessage(activeGenerationTab.id, userMessage);
+      addMessage(activeGenerationTab.id, agentMessage);
+      updateTab(activeGenerationTab.id, { activeMessageId: typingMsgId });
+
       await regeneratePlatform(currentJobId, activeTab, feedback || undefined);
       setShowFeedbackInput(false);
       setFeedback("");
@@ -99,12 +127,23 @@ export function ContentPanel() {
   };
 
   const handleOutlineApproved = () => {
+    const typingMsgId = `typing-${Date.now()}`;
     addMessage(activeGenerationTab.id, {
-      id: Math.random().toString(),
+      id: typingMsgId,
       role: "agent",
       content: "Outline approved! Writers have been dispatched to craft the platform posts.",
       timestamp: new Date(),
+      isTyping: true,
     });
+
+    // Set status to running, streaming to true, and activeMessageId to this new message
+    setStatus(JobStatus.Running);
+    setIsStreaming(true);
+    updateTab(activeGenerationTab.id, { activeMessageId: typingMsgId });
+
+    if (currentJobId) {
+      connectTabStream(activeGenerationTab.id, currentJobId);
+    }
   };
 
   const hasOutputs = outputs.length > 0;

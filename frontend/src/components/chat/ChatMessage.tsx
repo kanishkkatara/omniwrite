@@ -37,21 +37,20 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         {/* Bubble */}
         <div className={`${styles.bubble} ${isAgent ? styles.bubbleAgent : styles.bubbleUser}`}>
-          {message.isTyping ? (
-            <div className={styles.typingDots}>
-              <span className={styles.dot} />
-              <span className={styles.dot} />
-              <span className={styles.dot} />
-            </div>
-          ) : (
-            <div className={styles.bubbleContent}>
-              {isAgent ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-              ) : (
-                <span>{message.content}</span>
-              )}
-            </div>
-          )}
+          <div className={styles.bubbleContent}>
+            {isAgent ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+            ) : (
+              <span>{message.content}</span>
+            )}
+            {message.isTyping && (
+              <div className={styles.typingDots} style={{ marginTop: message.content ? "8px" : "0" }}>
+                <span className={styles.dot} />
+                <span className={styles.dot} />
+                <span className={styles.dot} />
+              </div>
+            )}
+          </div>
           <div className={styles.timestamp}>{formatTime(message.timestamp)}</div>
         </div>
       </div>

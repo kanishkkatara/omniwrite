@@ -47,6 +47,7 @@ interface GenerationActions {
   setActiveTab: (tabId: string) => void;
   updateTab: (tabId: string, updates: Partial<GenerationTab>) => void;
   addMessage: (tabId: string, message: Message) => void;
+  updateMessage: (tabId: string, msgId: string, updates: Partial<Message>) => void;
   updateTabStep: (tabId: string, step: AgentStep) => void;
   setTabOutput: (tabId: string, output: ContentOutput) => void;
 
@@ -102,6 +103,7 @@ const createNewTab = (id?: string, title: string = "New Generation"): Generation
     topic: "",
     messages: [],
     activePlatform: Platform.Blog,
+    activeMessageId: null,
   };
 };
 
@@ -172,6 +174,22 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
       tabs: state.tabs.map((t) =>
         t.id === tabId ? { ...t, messages: [...t.messages, message] } : t
       ),
+    }));
+  },
+
+  // Safe message updater — always reads from fresh state, never from stale closures.
+  // Use this instead of updateTab({ messages: staleList.map(...) }).
+  updateMessage: (tabId, msgId, updates) => {
+    set((state) => ({
+      tabs: state.tabs.map((t) => {
+        if (t.id !== tabId) return t;
+        return {
+          ...t,
+          messages: t.messages.map((m) =>
+            m.id === msgId ? { ...m, ...updates } : m
+          ),
+        };
+      }),
     }));
   },
 
@@ -273,11 +291,36 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
 
     const handleEvent = (event: JobEvent) => {
       const currentStore = get();
+      const tab = currentStore.tabs.find((t) => t.id === tabId);
+      const activeMsgId = tab?.activeMessageId;
+      const topic = tab?.topic || "";
+
+      const updateMsg = (content: string, isTyping: boolean) => {
+        if (!activeMsgId) return;
+        set((state) => ({
+          tabs: state.tabs.map((t) => {
+            if (t.id !== tabId) return t;
+            return {
+              ...t,
+              messages: t.messages.map((m) =>
+                m.id === activeMsgId ? { ...m, content, isTyping } : m
+              ),
+            };
+          }),
+        }));
+      };
+
       switch (event.event) {
         case "step_update": {
           const step = event.data as unknown as AgentStep;
           if (step && step.id) {
             currentStore.updateTabStep(tabId, step);
+            if (step.status === AgentStepStatus.Running && step.message) {
+              const prefix = tab && tab.outputs.length > 0
+                ? "Revising content..."
+                : `I've started the generation pipeline for: **"${topic}"**.`;
+              updateMsg(`${prefix}\n\n🔄 **Active Step**: ${step.message}`, true);
+            }
           }
           break;
         }
@@ -288,6 +331,10 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
               outline: outlineData,
               jobStatus: JobStatus.AwaitingOutlineApproval,
             });
+            updateMsg(
+              `I've generated the content outline.\n\nOutline ready — awaiting human approval in the right panel.`,
+              false
+            );
           }
           break;
         }
@@ -305,6 +352,13 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
             jobStatus: JobStatus.Completed,
             isStreaming: false,
           });
+          const prefix = tab && tab.outputs.length > 0
+            ? `I've completed revising the content posts based on your feedback.`
+            : `I've completed generating the content posts for all selected platforms!`;
+          updateMsg(
+            `${prefix}\n\nYou can view them in the right panel and ask me to make revisions here in the chat.`,
+            false
+          );
           currentStore.disconnectTabStream(tabId);
           break;
         }
@@ -318,18 +372,26 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
             jobStatus: JobStatus.Failed,
             isStreaming: false,
           });
+          updateMsg(`❌ **An error occurred during generation**:\n\n> ${errMsg}`, false);
           currentStore.disconnectTabStream(tabId);
           break;
         }
         case "progress": {
           const stepData = event.data as unknown as Partial<AgentStep>;
           if (stepData?.id) {
-            currentStore.updateTabStep(tabId, {
+            const step: AgentStep = {
               id: stepData.id,
               name: stepData.name ?? stepData.id,
               status: stepData.status ?? AgentStepStatus.Running,
               message: stepData.message,
-            });
+            };
+            currentStore.updateTabStep(tabId, step);
+            if (step.status === AgentStepStatus.Running && step.message) {
+              const prefix = tab && tab.outputs.length > 0
+                ? "Revising content..."
+                : `I've started the generation pipeline for: **"${topic}"**.`;
+              updateMsg(`${prefix}\n\n🔄 **Active Step**: ${step.message}`, true);
+            }
           }
           break;
         }
@@ -345,6 +407,24 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
         try {
           const job = await api.getJob(jobId);
           const currentStore = get();
+          const tab = currentStore.tabs.find((t) => t.id === tabId);
+          const activeMsgId = tab?.activeMessageId;
+          const topic = tab?.topic || "";
+
+          const updateMsg = (content: string, isTyping: boolean) => {
+            if (!activeMsgId) return;
+            set((state) => ({
+              tabs: state.tabs.map((t) => {
+                if (t.id !== tabId) return t;
+                return {
+                  ...t,
+                  messages: t.messages.map((m) =>
+                    m.id === activeMsgId ? { ...m, content, isTyping } : m
+                  ),
+                };
+              }),
+            }));
+          };
 
           currentStore.updateTab(tabId, { jobStatus: job.status });
 
@@ -360,6 +440,14 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
                 completed_at: step.completed_at,
               });
             });
+
+            const runningStep = job.steps.find((s: any) => s.status === AgentStepStatus.Running);
+            if (runningStep && runningStep.message) {
+              const prefix = tab && tab.outputs.length > 0
+                ? "Revising content..."
+                : `I've started the generation pipeline for: **"${topic}"**.`;
+              updateMsg(`${prefix}\n\n🔄 **Active Step**: ${runningStep.message}`, true);
+            }
           }
           if (job.outputs) {
             Object.values(job.outputs).forEach((out: any) =>
@@ -378,7 +466,21 @@ export const useGenerationStore = create<GenerationStore>()((set, get) => ({
             currentStore.disconnectTabStream(tabId);
             if (job.status === JobStatus.Failed && job.error) {
               currentStore.updateTab(tabId, { error: job.error });
+              updateMsg(`❌ **An error occurred during generation**:\n\n> ${job.error}`, false);
+            } else if (job.status === JobStatus.Completed) {
+              const prefix = tab && tab.outputs.length > 0
+                ? `I've completed revising the content posts based on your feedback.`
+                : `I've completed generating the content posts for all selected platforms!`;
+              updateMsg(
+                `${prefix}\n\nYou can view them in the right panel and ask me to make revisions here in the chat.`,
+                false
+              );
             }
+          } else if (job.status === JobStatus.AwaitingOutlineApproval) {
+            updateMsg(
+              `I've generated the content outline.\n\nOutline ready — awaiting human approval in the right panel.`,
+              false
+            );
           }
         } catch (err) {
           console.error("Polling error for tab:", tabId, err);

@@ -134,3 +134,68 @@ export function streamJobEvents(
     eventSource.close();
   };
 }
+
+export interface ChatRequest {
+  message: string;
+  active_platform: string;
+}
+
+export interface ChatResponse {
+  response_type: "chat" | "update";
+  content: string;
+}
+
+export async function streamChatWithContent(
+  jobId: string,
+  request: ChatRequest,
+  onChunk: (chunk: ChatResponse) => void
+): Promise<void> {
+  const response = await fetch(`${BASE_URL}/api/v1/jobs/${jobId}/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error ${response.status}`);
+  }
+
+  const reader = response.body?.getReader();
+  if (!reader) return;
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    // Keep the last incomplete line in the buffer
+    buffer = lines.pop() || "";
+
+    for (const line of lines) {
+      if (line.trim()) {
+        try {
+          const parsed = JSON.parse(line) as ChatResponse;
+          onChunk(parsed);
+        } catch (e) {
+          console.error("Failed to parse chunk:", line, e);
+        }
+      }
+    }
+  }
+
+  // Parse any remaining buffer
+  if (buffer.trim()) {
+    try {
+      const parsed = JSON.parse(buffer) as ChatResponse;
+      onChunk(parsed);
+    } catch (e) {
+      console.error("Failed to parse final chunk:", buffer, e);
+    }
+  }
+}

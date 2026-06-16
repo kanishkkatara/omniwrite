@@ -142,4 +142,5 @@ export interface GenerationTab {
   topic: string;
   messages: Message[];
   activePlatform: Platform;
+  activeMessageId?: string | null;
 }

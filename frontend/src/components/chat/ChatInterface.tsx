@@ -5,9 +5,9 @@ import styles from "./ChatInterface.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
 import { ChatMessage, Message } from "./ChatMessage";
 import { AgentProgress } from "./AgentProgress";
-import { ArrowUp, Sparkles, Plus, X, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowUp, Sparkles, Plus, X, Loader2, CheckCircle2, AlertCircle, Terminal, ChevronDown, ChevronUp } from "lucide-react";
 import { JobStatus, Platform } from "@/types/generation";
-import { regeneratePlatform } from "@/lib/api";
+import { streamChatWithContent } from "@/lib/api";
 
 export function ChatInterface() {
   const {
@@ -17,15 +17,18 @@ export function ChatInterface() {
     removeTab,
     setActiveTab,
     addMessage,
+    updateMessage,
     setTopic,
     startJob,
     setIsStreaming,
     setStatus,
     setOutput,
     connectTabStream,
+    updateTab,
   } = useGenerationStore();
 
   const [input, setInput] = useState("");
+  const [consoleOpen, setConsoleOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeTab = tabs.find((t) => t.id === activeTabId) || tabs[0];
@@ -74,6 +77,15 @@ export function ChatInterface() {
     const originalInput = input;
     setInput("");
 
+    const typingMsgId = `typing-${Date.now()}`;
+    addMessage(activeTab.id, {
+      id: typingMsgId,
+      role: "agent",
+      content: "",
+      timestamp: new Date(),
+      isTyping: true,
+    });
+
     // If currentJobId exists, treat the send action as platform regeneration feedback
     if (currentJobId) {
       const activePlatform = activeTab.activePlatform || Platform.Blog;
@@ -87,36 +99,61 @@ export function ChatInterface() {
 
       try {
         setIsStreaming(true);
-        setStatus(JobStatus.Running);
 
-        // Update store state with placeholder while background agents work
-        setOutput({
-          platform: activePlatform,
-          content: "*Regenerating content based on feedback... Please wait.*",
-        });
+        let responseType: "chat" | "update" | null = null;
+        let accumulatedContent = "";
 
-        // Add feedback initiation message to chat
-        const agentInitMessage: Message = {
-          id: Math.random().toString(),
-          role: "agent",
-          content: `I'm revising the **${activePlatformLabel}** content based on your feedback: "${originalInput}"...`,
-          timestamp: new Date(),
-        };
-        addMessage(activeTab.id, agentInitMessage);
+        // Call the streaming chat & classification endpoint
+        await streamChatWithContent(
+          currentJobId,
+          {
+            message: originalInput,
+            active_platform: activePlatform,
+          },
+          (chunk) => {
+            if (!responseType) {
+              responseType = chunk.response_type;
 
-        // Call regenerate API
-        await regeneratePlatform(currentJobId, activePlatform, originalInput);
+              if (responseType === "update") {
+                setStatus(JobStatus.Running);
 
-        // Start background SSE/polling stream
-        connectTabStream(activeTab.id, currentJobId);
+                // Update store state with placeholder while background agents work
+                setOutput({
+                  platform: activePlatform,
+                  content: "*Regenerating content based on feedback... Please wait.*",
+                });
+
+                // Update the typing bubble — safe: uses fresh state via updateMessage
+                updateTab(activeTab.id, { activeMessageId: typingMsgId });
+                updateMessage(activeTab.id, typingMsgId, {
+                  content: `I'm revising the **${activePlatformLabel}** content based on your feedback: "${originalInput}"...`,
+                  isTyping: true,
+                });
+
+                // Connect SSE stream to receive live progress logs
+                connectTabStream(activeTab.id, currentJobId);
+              }
+            }
+
+            if (responseType === "chat") {
+              accumulatedContent += chunk.content;
+              // Safe update: updateMessage reads from fresh store state
+              updateMessage(activeTab.id, typingMsgId, {
+                content: accumulatedContent,
+                isTyping: false,
+              });
+            }
+          }
+        );
+
+        if (responseType === "chat") {
+          setIsStreaming(false);
+        }
       } catch (e: any) {
         setIsStreaming(false);
-        setStatus(JobStatus.Failed);
-        addMessage(activeTab.id, {
-          id: Math.random().toString(),
-          role: "agent",
+        updateMessage(activeTab.id, typingMsgId, {
           content: `Failed to revise content: ${e?.message || e || "Unknown error"}`,
-          timestamp: new Date(),
+          isTyping: false,
         });
       }
       return;
@@ -127,22 +164,21 @@ export function ChatInterface() {
     setTopic(originalInput);
 
     try {
+      // Track this bubble message for streaming pipeline steps
+      updateTab(activeTab.id, { activeMessageId: typingMsgId });
+
       // Trigger decoupled job generation
       await startJob();
 
-      const agentInitMessage: Message = {
-        id: Math.random().toString(),
-        role: "agent",
-        content: `I've started the generation pipeline for: **"${originalInput}"**.\n\nRunning agents now...`,
-        timestamp: new Date(),
-      };
-      addMessage(activeTab.id, agentInitMessage);
+      // Update the typing message to notify that generation is active, but keep isTyping: true
+      updateMessage(activeTab.id, typingMsgId, {
+        content: `I've started the generation pipeline for: **"${originalInput}"**...`,
+        isTyping: true,
+      });
     } catch (e: any) {
-      addMessage(activeTab.id, {
-        id: Math.random().toString(),
-        role: "agent",
+      updateMessage(activeTab.id, typingMsgId, {
         content: `Sorry, I failed to start the generation: ${e?.message || e || "Unknown error"}`,
-        timestamp: new Date(),
+        isTyping: false,
       });
     }
   };
@@ -248,24 +284,41 @@ export function ChatInterface() {
           </div>
         </div>
       ) : (
-        <div className={styles.messages}>
-          {messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
-          ))}
-
-          {/* Render Active Job Status & Progress */}
-          {steps.length > 0 && <AgentProgress steps={steps} />}
-
-
-
-          {error && (
-            <div className="alert alert-error" style={{ margin: "12px 0" }}>
-              {error}
+        <>
+          {/* Collapsible Agent Console — sits above messages, collapsed by default */}
+          {steps.length > 0 && (
+            <div className={styles.consoleTray}>
+              <button
+                className={styles.consoleTrayToggle}
+                onClick={() => setConsoleOpen((v) => !v)}
+              >
+                <Terminal size={12} />
+                <span>Agent Console</span>
+                <span className={styles.consoleTrayStepCount}>{steps.length} step{steps.length !== 1 ? "s" : ""}</span>
+                {consoleOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </button>
+              {consoleOpen && (
+                <div className={styles.consoleTrayBody}>
+                  <AgentProgress steps={steps} />
+                </div>
+              )}
             </div>
           )}
 
-          <div ref={messagesEndRef} />
-        </div>
+          <div className={styles.messages}>
+            {messages.map((msg) => (
+              <ChatMessage key={msg.id} message={msg} />
+            ))}
+
+            {error && (
+              <div className="alert alert-error" style={{ margin: "12px 0" }}>
+                {error}
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        </>
       )}
 
       {/* Input area */}
