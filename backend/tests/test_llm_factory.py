@@ -1,14 +1,16 @@
 """
 Unit tests for LiteLLM factory and key injections.
 """
+
 from __future__ import annotations
 
 import os
 from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from backend.core.config import Settings
-from backend.core.llm_factory import llm_call, _inject_api_keys
+from backend.core.llm_factory import _inject_api_keys, llm_call
 from backend.models.request import ModelMode
 
 
@@ -46,9 +48,7 @@ def test_inject_api_keys():
 async def test_llm_call_success(mock_acompletion):
     """Test successful LLM calls resolve correctly and report costs."""
     mock_response = AsyncMock()
-    mock_response.choices = [
-        AsyncMock(message=AsyncMock(content="Hello response content"))
-    ]
+    mock_response.choices = [AsyncMock(message=AsyncMock(content="Hello response content"))]
     mock_response.usage = AsyncMock(prompt_tokens=15, completion_tokens=25)
     mock_acompletion.return_value = mock_response
 
@@ -67,7 +67,9 @@ async def test_llm_call_success(mock_acompletion):
 
 
 @pytest.mark.asyncio
-@patch("backend.core.llm_factory.acompletion", side_effect=Exception("LiteLLM mock connection error"))
+@patch(
+    "backend.core.llm_factory.acompletion", side_effect=Exception("LiteLLM mock connection error")
+)
 async def test_llm_call_failure_fallback(mock_acompletion):
     """Test that LLM factory falls back gracefully on LiteLLM connection failures."""
     messages = [{"role": "user", "content": "fail test"}]

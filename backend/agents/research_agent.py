@@ -8,6 +8,7 @@ Skips if:
 - state.request.skip_research is True
 - settings.research_enabled is False
 """
+
 from __future__ import annotations
 
 import logging
@@ -23,10 +24,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def _deduplicate(results: list["SearchResult"]) -> list["SearchResult"]:
+def _deduplicate(results: list[SearchResult]) -> list[SearchResult]:
     """Remove duplicate results by URL."""
     seen: set[str] = set()
-    unique: list["SearchResult"] = []
+    unique: list[SearchResult] = []
     for r in results:
         if r.url and r.url not in seen:
             seen.add(r.url)
@@ -45,7 +46,7 @@ def _build_search_queries(topic: str, key_points: list[str]) -> list[str]:
     return queries[:3]
 
 
-async def run_research(state: "AgentState", settings: "Settings") -> "AgentState":
+async def run_research(state: AgentState, settings: Settings) -> AgentState:
     """
     Run web research for the content brief.
 
@@ -88,7 +89,7 @@ async def run_research(state: "AgentState", settings: "Settings") -> "AgentState
             queries = (queries + extra_queries)[:3]
 
         provider = get_search_provider(settings)
-        all_results: list["SearchResult"] = []
+        all_results: list[SearchResult] = []
 
         for query in queries:
             logger.debug("Searching: %s", query)
@@ -105,8 +106,7 @@ async def run_research(state: "AgentState", settings: "Settings") -> "AgentState
 
         # Summarise results via LLM
         results_text = "\n\n".join(
-            f"[{i+1}] {r.title}\nURL: {r.url}\n{r.snippet}"
-            for i, r in enumerate(unique_results)
+            f"[{i + 1}] {r.title}\nURL: {r.url}\n{r.snippet}" for i, r in enumerate(unique_results)
         )
 
         summary_messages = [

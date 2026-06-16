@@ -4,6 +4,7 @@ Brave Search API provider for omniwrite.
 Uses httpx to call the Brave Search API (requires BRAVE_SEARCH_API_KEY).
 Brave provides high-quality, privacy-focused search results.
 """
+
 from __future__ import annotations
 
 import logging
@@ -28,12 +29,12 @@ class BraveProvider(SearchProvider):
     name = "brave"
     requires_api_key = True
 
-    def is_available(self, settings: "Settings") -> bool:
+    def is_available(self, settings: Settings) -> bool:
         return bool(settings.brave_search_api_key)
 
-    async def search(self, query: str, num_results: int = 5) -> list["SearchResult"]:
-        from backend.models.state import SearchResult  # noqa: PLC0415
+    async def search(self, query: str, num_results: int = 5) -> list[SearchResult]:
         from backend.core.config import get_settings  # noqa: PLC0415
+        from backend.models.state import SearchResult  # noqa: PLC0415
 
         settings = get_settings()
         api_key = settings.brave_search_api_key

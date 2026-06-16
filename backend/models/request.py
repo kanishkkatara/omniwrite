@@ -1,4 +1,5 @@
 """Request/response models for the generation API."""
+
 from __future__ import annotations
 
 from enum import Enum
@@ -79,8 +80,12 @@ class GenerateRequest(BaseModel):
 
     # Advanced
     model_mode: ModelMode = ModelMode.TEST
-    test_model: str | None = Field(default=None, description="Custom model name override for TEST mode")
-    production_model: str | None = Field(default=None, description="Custom model name override for PRODUCTION mode")
+    test_model: str | None = Field(
+        default=None, description="Custom model name override for TEST mode"
+    )
+    production_model: str | None = Field(
+        default=None, description="Custom model name override for PRODUCTION mode"
+    )
     creativity: float = Field(default=0.7, ge=0.0, le=1.0, description="Maps to temperature")
     skip_research: bool = Field(default=False, description="Skip web research, use brief only")
     skip_outline_approval: bool = Field(
@@ -110,7 +115,9 @@ class GenerationCost(BaseModel):
 
 class GenerateResponse(BaseModel):
     job_id: UUID
-    status: str  # pending | researching | strategizing | outlining | writing | editing | done | error
+    status: (
+        str  # pending | researching | strategizing | outlining | writing | editing | done | error
+    )
     outputs: dict[str, ContentOutput] = Field(default_factory=dict)
     outline: str | None = None
     cost_summary: GenerationCost | None = None

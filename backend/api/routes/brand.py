@@ -8,11 +8,12 @@ Full CRUD for brand profiles:
 - PUT    /api/v1/brands/{brand_id}   — Update brand
 - DELETE /api/v1/brands/{brand_id}   — Delete brand
 """
+
 from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status, Response
+from fastapi import APIRouter, HTTPException, status
 
 from backend.models.brand import BrandProfile, BrandProfileCreate, BrandProfileUpdate
 from backend.services.brand_service import brand_service

@@ -1,12 +1,11 @@
 """
 OmniWrite — Command Line Interface
 """
+
 from __future__ import annotations
 
 import asyncio
-import os
 import time
-from typing import List, Optional
 from uuid import uuid4
 
 import typer
@@ -14,10 +13,10 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from backend.core.config import get_settings
-from backend.models.request import GenerateRequest, Platform, ModelMode
-from backend.models.state import AgentState
 from backend.agents.graph import create_graph
+from backend.core.config import get_settings
+from backend.models.request import GenerateRequest, ModelMode, Platform
+from backend.models.state import AgentState
 
 app = typer.Typer(help="OmniWrite: Agentic multi-platform content generation tool")
 console = Console()
@@ -125,16 +124,16 @@ def generate(
     async def _execute():
         graph = create_graph(settings)
         state_dict = initial_state.model_dump(mode="json")
-        
+
         current_state_dict = state_dict
-        
+
         # Stream step events
         async for event in graph.astream(state_dict):
             for node_name, node_state in event.items():
                 if not isinstance(node_state, dict):
                     continue
                 current_state_dict = node_state
-                
+
                 steps = node_state.get("steps", [])
                 if steps:
                     last_step = steps[-1]
@@ -143,30 +142,34 @@ def generate(
                         f"{status_emoji} [cyan]{last_step.get('agent', node_name)}[/cyan]: "
                         f"{last_step.get('message', '')}"
                     )
-                
+
                 # Check for interactive outline approval
-                if not skip_outline_approval and not node_state.get("outline_approved", True) and node_state.get("outline"):
+                if (
+                    not skip_outline_approval
+                    and not node_state.get("outline_approved", True)
+                    and node_state.get("outline")
+                ):
                     console.print("\n[bold yellow]--- Proposed Outline ---[/bold yellow]")
                     console.print(node_state["outline"])
                     console.print("[bold yellow]------------------------[/bold yellow]\n")
-                    
+
                     approve = typer.confirm("Do you approve this outline?")
                     if not approve:
                         console.print("[red]Outline rejected. Aborting generation.[/red]")
                         raise typer.Exit(code=0)
-                    
+
                     # Set approved to True and re-run
                     node_state["outline_approved"] = True
                     # Continue execution with updated state
                     # We resume the remainder of the pipeline (writers -> editor) manually
                     from backend.agents.blog_writer import write_blog
-                    from backend.agents.reddit_writer import write_reddit
-                    from backend.agents.linkedin_writer import write_linkedin
-                    from backend.agents.linkedin_commenter import write_linkedin_comment
                     from backend.agents.editor_agent import run_editor
-                    
+                    from backend.agents.linkedin_commenter import write_linkedin_comment
+                    from backend.agents.linkedin_writer import write_linkedin
+                    from backend.agents.reddit_writer import write_reddit
+
                     state = AgentState(**node_state)
-                    
+
                     platforms_to_write = {p.value for p in request.platforms}
                     if "blog" in platforms_to_write:
                         console.print("⏳ [cyan]blog_writer[/cyan]: Writing blog post...")
@@ -178,9 +181,11 @@ def generate(
                         console.print("⏳ [cyan]linkedin_writer[/cyan]: Writing LinkedIn post...")
                         state = await write_linkedin(state, settings)
                     if "linkedin_comment" in platforms_to_write:
-                        console.print("⏳ [cyan]linkedin_commenter[/cyan]: Writing LinkedIn comment...")
+                        console.print(
+                            "⏳ [cyan]linkedin_commenter[/cyan]: Writing LinkedIn comment..."
+                        )
                         state = await write_linkedin_comment(state, settings)
-                        
+
                     console.print("⏳ [cyan]editor_agent[/cyan]: Editing and polishing content...")
                     state = await run_editor(state, settings)
                     current_state_dict = state.model_dump(mode="json")
@@ -188,12 +193,12 @@ def generate(
 
         # Final presentation
         console.print("\n[bold green]🎉 Generation completed successfully![/bold green]\n")
-        
+
         outputs = current_state_dict.get("outputs", {})
         for platform_name, output_data in outputs.items():
             content = output_data.get("content", "")
             word_count = output_data.get("word_count", 0)
-            
+
             console.print(
                 Panel(
                     content,
@@ -207,11 +212,15 @@ def generate(
         cost_table = Table(title="Cost and Token Summary")
         cost_table.add_column("Metric", style="cyan")
         cost_table.add_column("Value", style="magenta")
-        
-        cost_table.add_row("Total Input Tokens", str(current_state_dict.get("total_input_tokens", 0)))
-        cost_table.add_row("Total Output Tokens", str(current_state_dict.get("total_output_tokens", 0)))
+
+        cost_table.add_row(
+            "Total Input Tokens", str(current_state_dict.get("total_input_tokens", 0))
+        )
+        cost_table.add_row(
+            "Total Output Tokens", str(current_state_dict.get("total_output_tokens", 0))
+        )
         cost_table.add_row("Total Cost", f"${current_state_dict.get('total_cost_usd', 0.0):.5f}")
-        
+
         console.print(cost_table)
 
     run_async(_execute())

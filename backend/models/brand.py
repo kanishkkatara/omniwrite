@@ -1,12 +1,13 @@
 """Pydantic models for Brand Profiles."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 from uuid import UUID, uuid4
 
-from typing import Any
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class WritingPerspective(str, Enum):
@@ -60,7 +61,9 @@ class BrandProfileBase(BaseModel):
         default_factory=lambda: [BrandVoice.CONVERSATIONAL],
         description="Select up to 3 voice attributes",
     )
-    writing_perspective: WritingPerspective | None = Field(default=WritingPerspective.FIRST_PERSON_SINGULAR)
+    writing_perspective: WritingPerspective | None = Field(
+        default=WritingPerspective.FIRST_PERSON_SINGULAR
+    )
     competitor_brands: list[str] = Field(
         default_factory=list,
         max_length=5,
@@ -116,8 +119,8 @@ class BrandProfileUpdate(BaseModel):
 
 class BrandProfile(BrandProfileBase):
     id: UUID = Field(default_factory=uuid4)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     class Config:
         from_attributes = True
@@ -135,13 +138,9 @@ class BrandProfile(BrandProfileBase):
         if self.brand_voice:
             voices = ", ".join(v.value for v in self.brand_voice)
             lines.append(f"Brand voice: {voices}")
-        lines.append(
-            f"Writing perspective: {self.writing_perspective.value.replace('_', ' ')}"
-        )
+        lines.append(f"Writing perspective: {self.writing_perspective.value.replace('_', ' ')}")
         if self.competitor_brands:
-            lines.append(
-                f"Differentiate from: {', '.join(self.competitor_brands)}"
-            )
+            lines.append(f"Differentiate from: {', '.join(self.competitor_brands)}")
         if self.avoid_topics:
             lines.append(f"NEVER mention or include: {', '.join(self.avoid_topics)}")
         if self.sample_content:

@@ -2,6 +2,7 @@
 OmniWrite — Pydantic Settings & Configuration Loader
 Merges: config.yaml → .env → environment variables (env vars win)
 """
+
 from __future__ import annotations
 
 import os
@@ -32,6 +33,7 @@ def load_dotenv_manually() -> None:
                     val = val[1:-1]
                 if key and val:
                     os.environ[key] = val
+
 
 load_dotenv_manually()
 
@@ -119,7 +121,7 @@ class Settings(BaseSettings):
     # ── App settings (OMNIWRITE_ prefix) ────────────────────────────────────
     debug: bool = False
     log_level: str = "INFO"
-    default_mode: str = "test"   # test | production | local | groq
+    default_mode: str = "test"  # test | production | local | groq
     config_file: str = "config.yaml"
 
     # ── Server ────────────────────────────────────────────────────────────────
@@ -227,10 +229,9 @@ def get_settings() -> Settings:
 
     if "generation" in yaml_data:
         gen = yaml_data["generation"]
-        settings.generation = GenerationConfig(**{
-            k: v for k, v in gen.items()
-            if k in GenerationConfig.model_fields
-        })
+        settings.generation = GenerationConfig(
+            **{k: v for k, v in gen.items() if k in GenerationConfig.model_fields}
+        )
 
     if yaml_data.get("search", {}).get("research_enabled") is not None:
         settings.research_enabled = yaml_data["search"]["research_enabled"]

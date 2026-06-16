@@ -5,6 +5,7 @@ Parses the user's latest message into a structured ContentBrief.
 If the brief needs clarification, sets clarifying_questions and returns
 without marking it complete, prompting the API to ask the user for more info.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-async def extract_brief(state: "AgentState", settings: "Settings") -> "AgentState":
+async def extract_brief(state: AgentState, settings: Settings) -> AgentState:
     """
     Parse the user's last message into a ContentBrief.
 
@@ -57,9 +58,7 @@ async def extract_brief(state: "AgentState", settings: "Settings") -> "AgentStat
 
         last_message = state.messages[-1]
         user_content: str = (
-            last_message.content
-            if hasattr(last_message, "content")
-            else str(last_message)
+            last_message.content if hasattr(last_message, "content") else str(last_message)
         )
 
         brand_context = state.brand.to_prompt_context() if state.brand else ""

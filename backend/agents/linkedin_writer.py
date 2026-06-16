@@ -4,6 +4,7 @@ LinkedIn Writer Agent.
 Uses LinkedInPlugin to generate a LinkedIn post and stores the result
 in state.outputs["linkedin"].
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 _plugin = LinkedInPlugin()
 
 
-async def write_linkedin(state: "AgentState", settings: "Settings") -> "AgentState":
+async def write_linkedin(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate a LinkedIn post and store it in state.outputs["linkedin"].
 

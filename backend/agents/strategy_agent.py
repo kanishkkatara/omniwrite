@@ -5,6 +5,7 @@ Uses the content brief, research summary, and brand context to generate
 a ContentStrategy with primary angle, narrative hook, per-platform tones,
 and hook variants.
 """
+
 from __future__ import annotations
 
 import json
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-async def run_strategy(state: "AgentState", settings: "Settings") -> "AgentState":
+async def run_strategy(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate a ContentStrategy from the brief, research, and brand context.
 
@@ -50,7 +51,11 @@ async def run_strategy(state: "AgentState", settings: "Settings") -> "AgentState
         key_points = brief.key_points or []
         research_summary = state.research_summary or ""
         brand_context = state.brand.to_prompt_context() if state.brand else ""
-        platforms = [p.value for p in state.request.platforms] if state.request else ["blog", "linkedin", "reddit"]
+        platforms = (
+            [p.value for p in state.request.platforms]
+            if state.request
+            else ["blog", "linkedin", "reddit"]
+        )
         num_variants = state.request.variants if state.request else 1
 
         system_prompt = (

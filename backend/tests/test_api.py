@@ -1,14 +1,13 @@
 """
 Integration tests for FastAPI endpoints.
 """
+
 from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import SQLModel
 
 from backend.main import app
-from backend.services.storage import get_engine
 
 client = TestClient(app)
 
@@ -45,21 +44,21 @@ def test_create_and_get_brand_endpoint():
         "avoid_topics": [],
         "sample_content": [],
     }
-    
+
     # Create brand
     response = client.post("/api/v1/brands", json=payload)
     assert response.status_code == 201
     brand_data = response.json()
     assert brand_data["name"] == "Acme Niche"
     assert "id" in brand_data
-    
+
     brand_id = brand_data["id"]
-    
+
     # Get brand by ID
     response = client.get(f"/api/v1/brands/{brand_id}")
     assert response.status_code == 200
     assert response.json()["name"] == "Acme Niche"
-    
+
     # List all brands
     response = client.get("/api/v1/brands")
     assert response.status_code == 200

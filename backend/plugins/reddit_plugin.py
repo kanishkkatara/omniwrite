@@ -6,6 +6,7 @@ Generates native-sounding Reddit posts with:
 - Conversational, opinionated body
 - TL;DR summary
 """
+
 from __future__ import annotations
 
 import logging
@@ -31,7 +32,7 @@ class RedditPlugin(PlatformPlugin):
     max_words = 800
     supports_publish = False
 
-    def get_system_prompt(self, brand: "BrandProfile | None") -> str:
+    def get_system_prompt(self, brand: BrandProfile | None) -> str:
         brand_context = brand.to_prompt_context() if brand else ""
         base = """You are a native Reddit user and expert communicator writing in authentic Reddit style.
 
@@ -48,13 +49,15 @@ Your rules:
 - Sound like you discovered something cool and want to share it"""
 
         if brand_context:
-            base += f"\n\nBrand context (for background, not for copying verbatim):\n{brand_context}"
+            base += (
+                f"\n\nBrand context (for background, not for copying verbatim):\n{brand_context}"
+            )
 
         base += "\n\nOutput format:\n**Title:** [your title]\n\n[post body]\n\n**TL;DR:** [1–2 sentence summary]"
         base += "\n\nOutput the Reddit post ONLY."
         return base
 
-    async def generate(self, state: "AgentState", settings: "Settings") -> str:
+    async def generate(self, state: AgentState, settings: Settings) -> str:
         request = state.request
         brief = state.brief
         strategy = state.strategy

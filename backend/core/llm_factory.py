@@ -7,6 +7,7 @@ Provides a single async entry-point `llm_call` that:
 - Tracks input/output token counts and USD cost
 - Falls back gracefully on errors
 """
+
 from __future__ import annotations
 
 import logging
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 litellm.suppress_debug_info = True
 
 
-def _inject_api_keys(settings: "Settings") -> None:
+def _inject_api_keys(settings: Settings) -> None:
     """Set API key environment variables so LiteLLM can pick them up."""
     if settings.openai_api_key:
         os.environ["OPENAI_API_KEY"] = settings.openai_api_key
@@ -37,9 +38,9 @@ def _inject_api_keys(settings: "Settings") -> None:
 async def llm_call(
     messages: list[dict],
     agent_name: str | None = None,
-    model_mode: "ModelMode | None" = None,
+    model_mode: ModelMode | None = None,
     temperature_override: float | None = None,
-    settings: "Settings | None" = None,
+    settings: Settings | None = None,
 ) -> tuple[str, int, int, float]:
     """
     Make an async LLM call via LiteLLM.
@@ -70,7 +71,9 @@ async def llm_call(
         mode_str = model_mode.value if hasattr(model_mode, "value") else str(model_mode)
         model_cfg = settings.models.get(mode_str, model_cfg)
 
-    temperature = temperature_override if temperature_override is not None else model_cfg.temperature
+    temperature = (
+        temperature_override if temperature_override is not None else model_cfg.temperature
+    )
 
     kwargs: dict = {
         "model": model_cfg.model,

@@ -9,6 +9,7 @@ Reviews all platform outputs for:
 
 Always uses the PRODUCTION model for quality assurance.
 """
+
 from __future__ import annotations
 
 import json
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-async def run_editor(state: "AgentState", settings: "Settings") -> "AgentState":
+async def run_editor(state: AgentState, settings: Settings) -> AgentState:
     """
     Review and lightly edit all generated outputs.
 
@@ -74,13 +75,12 @@ async def run_editor(state: "AgentState", settings: "Settings") -> "AgentState":
         )
 
         outputs_block = "\n\n".join(outputs_text_parts)
-        user_prompt = (
-            f"Topic: {topic}\n"
-            f"Brand: {brand_name}\n"
-        )
+        user_prompt = f"Topic: {topic}\nBrand: {brand_name}\n"
         if research_summary:
             user_prompt += f"\nResearch context:\n{research_summary[:800]}\n"
-        user_prompt += f"\n--- OUTPUTS TO REVIEW ---\n\n{outputs_block}\n\n---\n\nReturn ONLY valid JSON."
+        user_prompt += (
+            f"\n--- OUTPUTS TO REVIEW ---\n\n{outputs_block}\n\n---\n\nReturn ONLY valid JSON."
+        )
 
         messages = [
             {"role": "system", "content": system_prompt},
@@ -115,6 +115,7 @@ async def run_editor(state: "AgentState", settings: "Settings") -> "AgentState":
                 if platform_key in state.outputs and isinstance(edited_content, str):
                     original = state.outputs[platform_key]
                     from backend.models.request import ContentOutput  # noqa: PLC0415
+
                     state.outputs[platform_key] = ContentOutput(
                         platform=original.platform,
                         content=edited_content,
@@ -131,7 +132,9 @@ async def run_editor(state: "AgentState", settings: "Settings") -> "AgentState":
 
         except (json.JSONDecodeError, TypeError) as parse_exc:
             logger.warning("Editor returned non-JSON (%s); keeping original outputs", parse_exc)
-            state.add_step("editor", "done", "Review complete (parser warning — originals preserved)")
+            state.add_step(
+                "editor", "done", "Review complete (parser warning — originals preserved)"
+            )
 
     except Exception as exc:  # noqa: BLE001
         logger.exception("Editor agent failed: %s", exc)

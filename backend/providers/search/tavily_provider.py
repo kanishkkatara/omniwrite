@@ -4,6 +4,7 @@ Tavily search provider for omniwrite.
 Uses the official tavily-python async client to perform AI-powered web searches.
 Requires a TAVILY_API_KEY.
 """
+
 from __future__ import annotations
 
 import logging
@@ -24,10 +25,10 @@ class TavilyProvider(SearchProvider):
     name = "tavily"
     requires_api_key = True
 
-    def is_available(self, settings: "Settings") -> bool:
+    def is_available(self, settings: Settings) -> bool:
         return bool(settings.tavily_api_key)
 
-    async def search(self, query: str, num_results: int = 5) -> list["SearchResult"]:
+    async def search(self, query: str, num_results: int = 5) -> list[SearchResult]:
         from backend.models.state import SearchResult  # noqa: PLC0415
 
         try:

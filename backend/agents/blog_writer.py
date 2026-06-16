@@ -4,6 +4,7 @@ Blog Writer Agent.
 Uses BlogPlugin to generate a long-form blog post and stores the result
 in state.outputs["blog"].
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 _plugin = BlogPlugin()
 
 
-async def write_blog(state: "AgentState", settings: "Settings") -> "AgentState":
+async def write_blog(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate a blog post and store it in state.outputs["blog"].
 

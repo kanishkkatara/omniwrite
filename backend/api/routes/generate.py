@@ -8,21 +8,19 @@ Endpoints:
 - POST /api/v1/jobs/{job_id}/approve-outline     — Submit outline approval/rejection
 - POST /api/v1/jobs/{job_id}/regenerate/{platform} — Regenerate one platform
 """
+
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
-from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse
 
 from backend.models.request import (
     ApproveOutlineRequest,
     GenerateRequest,
-    GenerateResponse,
     Platform,
     RegenerateRequest,
 )

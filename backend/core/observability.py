@@ -9,6 +9,7 @@ Initialises:
 Call `setup_observability(settings)` once at application startup.
 Use `get_tracer()` to obtain a named OTel tracer in any module.
 """
+
 from __future__ import annotations
 
 import logging
@@ -94,7 +95,8 @@ class _NoOpSpan:
 
 # ── Public setup function ─────────────────────────────────────────────────────
 
-def setup_observability(settings: "Settings") -> None:
+
+def setup_observability(settings: Settings) -> None:
     """
     Initialise all observability tooling.
 
@@ -129,9 +131,7 @@ def setup_observability(settings: "Settings") -> None:
             _tracer = trace.get_tracer("omniwrite")
             logger.info("OpenTelemetry OTLP exporter configured → %s", obs.otlp_endpoint)
         except ImportError:
-            logger.warning(
-                "opentelemetry-exporter-otlp not installed; OTLP tracing disabled."
-            )
+            logger.warning("opentelemetry-exporter-otlp not installed; OTLP tracing disabled.")
         except Exception as exc:  # noqa: BLE001
             logger.warning("Failed to initialise OTLP tracer: %s", exc)
 

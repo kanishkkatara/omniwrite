@@ -1,6 +1,7 @@
 """
 OmniWrite — FastAPI Application Entry Point
 """
+
 from __future__ import annotations
 
 import logging
@@ -11,7 +12,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.routes.brand import router as brand_router
-from backend.api.routes.generate import router as jobs_router, generate_router
+from backend.api.routes.generate import generate_router
+from backend.api.routes.generate import router as jobs_router
 from backend.api.routes.health import router as health_router
 from backend.core.config import get_settings
 from backend.services.storage import create_tables

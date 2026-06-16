@@ -1,4 +1,5 @@
 """LangGraph AgentState — the shared state object flowing through the agent graph."""
+
 from __future__ import annotations
 
 from typing import Annotated, Any
@@ -8,11 +9,15 @@ from langgraph.graph.message import add_messages
 from pydantic import BaseModel, Field
 
 from backend.models.brand import BrandProfile
-from backend.models.request import ContentLength, ContentOutput, CTAType, GenerateRequest, GenerationCost, ModelMode, Platform, ReadingLevel
+from backend.models.request import (
+    ContentOutput,
+    GenerateRequest,
+)
 
 
 class AgentStep(BaseModel):
     """Represents one completed agent step for streaming to the frontend."""
+
     agent: str
     status: str  # running | done | error
     message: str = ""
@@ -28,6 +33,7 @@ class SearchResult(BaseModel):
 
 class ContentBrief(BaseModel):
     """Structured brief extracted from the user's chat input."""
+
     topic: str
     key_points: list[str] = Field(default_factory=list)
     seo_keywords: list[str] = Field(default_factory=list)
@@ -40,6 +46,7 @@ class ContentBrief(BaseModel):
 
 class ContentStrategy(BaseModel):
     """Output of the Strategy Agent."""
+
     primary_angle: str
     narrative_hook: str
     tone_per_platform: dict[str, str] = Field(default_factory=dict)
@@ -91,10 +98,10 @@ class AgentState(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def add_step(self, agent: str, status: str, message: str = "", data: dict | None = None) -> None:
-        self.steps.append(
-            AgentStep(agent=agent, status=status, message=message, data=data or {})
-        )
+    def add_step(
+        self, agent: str, status: str, message: str = "", data: dict | None = None
+    ) -> None:
+        self.steps.append(AgentStep(agent=agent, status=status, message=message, data=data or {}))
         self.current_step = agent
 
     def add_cost(self, input_tokens: int, output_tokens: int, cost: float) -> None:

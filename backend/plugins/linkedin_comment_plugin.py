@@ -5,6 +5,7 @@ Generates the author's first comment under their own LinkedIn post.
 This is a high-engagement tactic where the author adds context,
 a link, or sparks discussion immediately after publishing.
 """
+
 from __future__ import annotations
 
 import logging
@@ -30,7 +31,7 @@ class LinkedInCommentPlugin(PlatformPlugin):
     max_words = 150
     supports_publish = False
 
-    def get_system_prompt(self, brand: "BrandProfile | None") -> str:
+    def get_system_prompt(self, brand: BrandProfile | None) -> str:
         brand_context = brand.to_prompt_context() if brand else ""
         base = """You write the author's first comment on their own LinkedIn post.
 
@@ -56,7 +57,7 @@ Rules:
         base += "\n\nOutput the comment text ONLY."
         return base
 
-    async def generate(self, state: "AgentState", settings: "Settings") -> str:
+    async def generate(self, state: AgentState, settings: Settings) -> str:
         request = state.request
         brief = state.brief
         strategy = state.strategy
@@ -78,17 +79,15 @@ Rules:
             f"Write the first comment that the author would post under their LinkedIn post about: {topic}"
         ]
         if linkedin_post_text:
-            user_parts.append(f"The LinkedIn post text (for context):\n---\n{linkedin_post_text}\n---")
+            user_parts.append(
+                f"The LinkedIn post text (for context):\n---\n{linkedin_post_text}\n---"
+            )
         if primary_angle:
             user_parts.append(f"Main angle of the post: {primary_angle}")
         if key_points:
-            user_parts.append(
-                "Topics covered:\n" + "\n".join(f"- {p}" for p in key_points)
-            )
+            user_parts.append("Topics covered:\n" + "\n".join(f"- {p}" for p in key_points))
         if source_urls:
-            user_parts.append(
-                f"Possible resource links to reference: {', '.join(source_urls[:2])}"
-            )
+            user_parts.append(f"Possible resource links to reference: {', '.join(source_urls[:2])}")
         if cta_type and cta_type != "none":
             user_parts.append(
                 f"The post's CTA is: {cta_type.replace('_', ' ')} — the comment should reinforce this"

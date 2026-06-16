@@ -3,6 +3,7 @@ Health check API routes.
 
 GET /api/v1/health — Returns service health status, version, mode, and LLM availability.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter

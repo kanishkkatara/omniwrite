@@ -23,6 +23,7 @@ Human-in-the-loop checkpoints:
 Writers run in parallel using asyncio.gather — all are called as a single
 "writers" node that fans out internally.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -50,17 +51,21 @@ logger = logging.getLogger(__name__)
 
 # ── Node wrappers (bind settings) ─────────────────────────────────────────────
 
-def _make_node(agent_fn, settings: "Settings"):
+
+def _make_node(agent_fn, settings: Settings):
     """Return an async node function pre-bound to settings."""
+
     async def node(state_dict: dict[str, Any]) -> dict[str, Any]:
         state = AgentState(**state_dict)
         updated = await agent_fn(state, settings)
         return updated.model_dump()
+
     return node
 
 
-def _make_writers_node(settings: "Settings"):
+def _make_writers_node(settings: Settings):
     """Return a parallel writers node that runs all requested platforms concurrently."""
+
     async def writers_node(state_dict: dict[str, Any]) -> dict[str, Any]:
         state = AgentState(**state_dict)
         request = state.request
@@ -116,10 +121,15 @@ def _make_writers_node(settings: "Settings"):
 
 # ── Conditional edge functions ────────────────────────────────────────────────
 
+
 def _route_after_brief(state_dict: dict[str, Any]) -> str:
     """Route to research if brief is complete, else END (await user clarification)."""
     brief_data = state_dict.get("brief") or {}
-    is_complete = brief_data.get("is_complete", True) if isinstance(brief_data, dict) else getattr(brief_data, "is_complete", True)
+    is_complete = (
+        brief_data.get("is_complete", True)
+        if isinstance(brief_data, dict)
+        else getattr(brief_data, "is_complete", True)
+    )
     if not is_complete:
         logger.info("Brief incomplete — routing to END (awaiting clarification)")
         return END
@@ -137,7 +147,8 @@ def _route_after_outline(state_dict: dict[str, Any]) -> str:
 
 # ── Graph factory ─────────────────────────────────────────────────────────────
 
-def create_graph(settings: "Settings"):
+
+def create_graph(settings: Settings):
     """
     Build and compile the LangGraph StateGraph.
 

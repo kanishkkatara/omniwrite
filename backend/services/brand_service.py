@@ -4,6 +4,7 @@ Brand Service.
 Business-logic layer for brand profile CRUD operations.
 Converts between Pydantic models and database records.
 """
+
 from __future__ import annotations
 
 import json

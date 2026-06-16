@@ -4,6 +4,7 @@ LinkedIn Commenter Agent.
 Uses LinkedInCommentPlugin to generate the author's first comment
 on their LinkedIn post. Stores result in state.outputs["linkedin_comment"].
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 _plugin = LinkedInCommentPlugin()
 
 
-async def write_linkedin_comment(state: "AgentState", settings: "Settings") -> "AgentState":
+async def write_linkedin_comment(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate the LinkedIn first comment and store it in state.outputs["linkedin_comment"].
 
@@ -52,7 +53,9 @@ async def write_linkedin_comment(state: "AgentState", settings: "Settings") -> "
                 {"word_count": word_count},
             )
         else:
-            state.add_step("linkedin_commenter", "error", f"LinkedIn comment generation failed: {content}")
+            state.add_step(
+                "linkedin_commenter", "error", f"LinkedIn comment generation failed: {content}"
+            )
             logger.error("LinkedIn commenter error: %s", content)
 
     except Exception as exc:  # noqa: BLE001

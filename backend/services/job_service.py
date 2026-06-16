@@ -7,14 +7,16 @@ Manages the lifecycle of content generation jobs:
 - Streams progress events via asyncio.Queue (for SSE)
 - Stores intermediate and final state in the database
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
 import logging
 import time
-from typing import Any, AsyncGenerator
-from uuid import UUID, uuid4
+from collections.abc import AsyncGenerator
+from typing import Any
+from uuid import UUID
 
 from backend.models.request import GenerateRequest
 from backend.models.state import AgentState
@@ -103,17 +105,21 @@ class JobService:
             request: The generation request.
             brand: Optional BrandProfile.
         """
-        from backend.core.config import get_settings  # noqa: PLC0415
         from backend.agents.graph import create_graph  # noqa: PLC0415
+        from backend.core.config import get_settings  # noqa: PLC0415
 
         settings = get_settings()
         if request.test_model or request.production_model:
             settings = settings.model_copy()
             settings.models = dict(settings.models)
             if request.test_model:
-                settings.models["test"] = settings.models["test"].model_copy(update={"model": request.test_model})
+                settings.models["test"] = settings.models["test"].model_copy(
+                    update={"model": request.test_model}
+                )
             if request.production_model:
-                settings.models["production"] = settings.models["production"].model_copy(update={"model": request.production_model})
+                settings.models["production"] = settings.models["production"].model_copy(
+                    update={"model": request.production_model}
+                )
         job_id_str = str(job_id)
 
         # Initialise SSE queue
@@ -152,18 +158,24 @@ class JobService:
                     steps = node_state.get("steps", [])
                     if steps:
                         last_step = steps[-1]
-                        await _emit("step", {
-                            "agent": last_step.get("agent", node_name),
-                            "status": last_step.get("status", "running"),
-                            "message": last_step.get("message", ""),
-                        })
+                        await _emit(
+                            "step",
+                            {
+                                "agent": last_step.get("agent", node_name),
+                                "status": last_step.get("status", "running"),
+                                "message": last_step.get("message", ""),
+                            },
+                        )
 
                     # Check if waiting for outline approval
                     if not node_state.get("outline_approved", True) and node_state.get("outline"):
-                        await _emit("outline_ready", {
-                            "outline": node_state["outline"],
-                            "message": "Outline ready for review",
-                        })
+                        await _emit(
+                            "outline_ready",
+                            {
+                                "outline": node_state["outline"],
+                                "message": "Outline ready for review",
+                            },
+                        )
                         # Save state for resume
                         _pending_states[job_id_str] = node_state
                         await job_store.update_job_status(job_id, "awaiting_outline_approval")
@@ -175,9 +187,12 @@ class JobService:
                     brief_data = node_state.get("brief") or {}
                     if isinstance(brief_data, dict) and not brief_data.get("is_complete", True):
                         questions = brief_data.get("clarifying_questions", [])
-                        await _emit("clarification_needed", {
-                            "questions": questions,
-                        })
+                        await _emit(
+                            "clarification_needed",
+                            {
+                                "questions": questions,
+                            },
+                        )
                         await job_store.update_job_status(job_id, "awaiting_clarification")
                         await job_store.update_job_state(job_id, node_state)
                         await queue.put(None)
@@ -199,11 +214,14 @@ class JobService:
                 await job_store.update_job_outputs(job_id, outputs_json, final_state_dict)
                 await job_store.update_job_status(job_id, "done")
 
-                await _emit("done", {
-                    "status": "done",
-                    "outputs": outputs_json,
-                    "total_cost_usd": final_state_dict.get("total_cost_usd", 0.0),
-                })
+                await _emit(
+                    "done",
+                    {
+                        "status": "done",
+                        "outputs": outputs_json,
+                        "total_cost_usd": final_state_dict.get("total_cost_usd", 0.0),
+                    },
+                )
             else:
                 await job_store.update_job_status(job_id, "done")
                 await _emit("done", {"status": "done"})
@@ -265,10 +283,10 @@ class JobService:
 
         request_data = json.loads(job.request_json)
         from backend.models.request import GenerateRequest  # noqa: PLC0415
+
         request = GenerateRequest(**request_data)
 
         # Reconstruct state and run writers + editor
-        from backend.agents.graph import create_graph  # noqa: PLC0415
         from backend.core.config import get_settings  # noqa: PLC0415
 
         settings = get_settings()
@@ -281,13 +299,16 @@ class JobService:
             try:
                 # Run writers and editor from the pending state
                 from backend.models.state import AgentState  # noqa: PLC0415
+
                 state = AgentState(**pending_state)
 
                 from backend.agents.blog_writer import write_blog  # noqa: PLC0415
-                from backend.agents.reddit_writer import write_reddit  # noqa: PLC0415
-                from backend.agents.linkedin_writer import write_linkedin  # noqa: PLC0415
-                from backend.agents.linkedin_commenter import write_linkedin_comment  # noqa: PLC0415
                 from backend.agents.editor_agent import run_editor  # noqa: PLC0415
+                from backend.agents.linkedin_commenter import (
+                    write_linkedin_comment,  # noqa: PLC0415
+                )
+                from backend.agents.linkedin_writer import write_linkedin  # noqa: PLC0415
+                from backend.agents.reddit_writer import write_reddit  # noqa: PLC0415
 
                 platforms_to_write: set[str] = set()
                 if request.platforms:
@@ -312,11 +333,15 @@ class JobService:
 
                 await job_store.update_job_outputs(job_id, outputs_json, state_dict)
                 await job_store.update_job_status(job_id, "done")
-                await queue.put({"event": "done", "data": {"status": "done", "outputs": outputs_json}})
+                await queue.put(
+                    {"event": "done", "data": {"status": "done", "outputs": outputs_json}}
+                )
             except Exception as exc:  # noqa: BLE001
                 logger.exception("Resume after outline approval failed: %s", exc)
                 await job_store.update_job_status(job_id, "error", error=str(exc))
-                await queue.put({"event": "error", "data": {"error": str(exc), "message": str(exc)}})
+                await queue.put(
+                    {"event": "error", "data": {"error": str(exc), "message": str(exc)}}
+                )
             finally:
                 await queue.put(None)
 
@@ -355,7 +380,7 @@ class JobService:
                     break
                 yield event
                 queue.task_done()
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 yield {"event": "ping", "data": {"alive": True}}
 
         # Cleanup
@@ -400,9 +425,13 @@ class JobService:
             settings = settings.model_copy()
             settings.models = dict(settings.models)
             if request.test_model:
-                settings.models["test"] = settings.models["test"].model_copy(update={"model": request.test_model})
+                settings.models["test"] = settings.models["test"].model_copy(
+                    update={"model": request.test_model}
+                )
             if request.production_model:
-                settings.models["production"] = settings.models["production"].model_copy(update={"model": request.production_model})
+                settings.models["production"] = settings.models["production"].model_copy(
+                    update={"model": request.production_model}
+                )
 
         async def _regen():
             try:
@@ -419,13 +448,17 @@ class JobService:
                     "blog": ("backend.agents.blog_writer", "write_blog"),
                     "reddit": ("backend.agents.reddit_writer", "write_reddit"),
                     "linkedin": ("backend.agents.linkedin_writer", "write_linkedin"),
-                    "linkedin_comment": ("backend.agents.linkedin_commenter", "write_linkedin_comment"),
+                    "linkedin_comment": (
+                        "backend.agents.linkedin_commenter",
+                        "write_linkedin_comment",
+                    ),
                 }
 
                 if platform not in plugin_map:
                     return
 
                 import importlib  # noqa: PLC0415
+
                 mod_path, fn_name = plugin_map[platform]
                 mod = importlib.import_module(mod_path)
                 fn = getattr(mod, fn_name)

@@ -4,6 +4,7 @@ Abstract base class for all platform plugins in omniwrite.
 Every platform plugin (Blog, Reddit, LinkedIn, etc.) must subclass
 PlatformPlugin and implement `generate` and `get_system_prompt`.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -28,7 +29,7 @@ class PlatformPlugin(ABC):
     # ── Abstract interface ────────────────────────────────────────────────────
 
     @abstractmethod
-    async def generate(self, state: "AgentState", settings: "Settings") -> str:
+    async def generate(self, state: AgentState, settings: Settings) -> str:
         """
         Generate platform content for the given agent state.
 
@@ -41,7 +42,7 @@ class PlatformPlugin(ABC):
         """
 
     @abstractmethod
-    def get_system_prompt(self, brand: "BrandProfile | None") -> str:
+    def get_system_prompt(self, brand: BrandProfile | None) -> str:
         """
         Build a system prompt incorporating the brand profile (if any).
 

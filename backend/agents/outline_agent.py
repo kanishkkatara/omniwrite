@@ -5,6 +5,7 @@ Creates a structured, human-reviewable blog post outline.
 Sets state.outline_approved = False to pause the graph for human review
 when outline approval is enabled in settings.
 """
+
 from __future__ import annotations
 
 import logging
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-async def create_outline(state: "AgentState", settings: "Settings") -> "AgentState":
+async def create_outline(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate a Markdown blog post outline based on strategy.
 

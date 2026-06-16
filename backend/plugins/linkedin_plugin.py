@@ -7,6 +7,7 @@ Generates high-performing LinkedIn posts with:
 - Power sentences and storytelling
 - Engagement question or CTA at the end
 """
+
 from __future__ import annotations
 
 import logging
@@ -32,7 +33,7 @@ class LinkedInPlugin(PlatformPlugin):
     max_words = 300
     supports_publish = False
 
-    def get_system_prompt(self, brand: "BrandProfile | None") -> str:
+    def get_system_prompt(self, brand: BrandProfile | None) -> str:
         brand_context = brand.to_prompt_context() if brand else ""
         base = """You are a LinkedIn native content creator who understands exactly how the algorithm and human psychology intersect on this platform.
 
@@ -52,7 +53,7 @@ LinkedIn post rules:
         base += "\n\nOutput the LinkedIn post text ONLY — no labels, no meta-commentary."
         return base
 
-    async def generate(self, state: "AgentState", settings: "Settings") -> str:
+    async def generate(self, state: AgentState, settings: Settings) -> str:
         request = state.request
         brief = state.brief
         strategy = state.strategy
@@ -61,7 +62,9 @@ LinkedIn post rules:
         key_points = brief.key_points if brief else (request.key_points if request else [])
         cta_type = request.cta_type.value if request else "none"
         audience = request.linkedin_audience or (
-            ", ".join(state.brand.target_audience) if state.brand and state.brand.target_audience else ""
+            ", ".join(state.brand.target_audience)
+            if state.brand and state.brand.target_audience
+            else ""
         )
         primary_angle = strategy.primary_angle if strategy else ""
         narrative_hook = strategy.narrative_hook if strategy else ""
@@ -86,7 +89,9 @@ LinkedIn post rules:
         if platform_tone:
             user_parts.append(f"Tone: {platform_tone}")
         if key_points:
-            user_parts.append("Key insights to include:\n" + "\n".join(f"• {p}" for p in key_points))
+            user_parts.append(
+                "Key insights to include:\n" + "\n".join(f"• {p}" for p in key_points)
+            )
         if cta_type and cta_type != "none":
             user_parts.append(f"CTA type: {cta_type.replace('_', ' ')}")
         user_parts.append(

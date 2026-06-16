@@ -4,6 +4,7 @@ DuckDuckGo search provider for omniwrite.
 Uses duckduckgo_search (free, no API key required) as a fallback provider.
 Runs synchronous DDG calls in a thread executor to remain async-compatible.
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -25,7 +26,7 @@ class DuckDuckGoProvider(SearchProvider):
     name = "duckduckgo"
     requires_api_key = False
 
-    def is_available(self, settings: "Settings") -> bool:  # noqa: ARG002
+    def is_available(self, settings: Settings) -> bool:  # noqa: ARG002
         try:
             import duckduckgo_search  # noqa: F401
 
@@ -33,7 +34,7 @@ class DuckDuckGoProvider(SearchProvider):
         except ImportError:
             return False
 
-    async def search(self, query: str, num_results: int = 5) -> list["SearchResult"]:
+    async def search(self, query: str, num_results: int = 5) -> list[SearchResult]:
         from backend.models.state import SearchResult  # noqa: PLC0415
 
         try:

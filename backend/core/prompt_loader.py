@@ -9,6 +9,7 @@ Usage:
     rendered = loader.render("platforms/blog", context={"topic": "AI", ...})
     # → {"system": "...", "user": "..."}
 """
+
 from __future__ import annotations
 
 import logging
@@ -62,7 +63,9 @@ class PromptLoader:
             tmpl: Template = self._jinja_env.from_string(template_str)
             return tmpl.render(**context)
         except UndefinedError as exc:
-            logger.warning("Prompt template variable missing: %s — rendering with relaxed mode", exc)
+            logger.warning(
+                "Prompt template variable missing: %s — rendering with relaxed mode", exc
+            )
             # Fall back with undefined variables rendered as empty string
             from jinja2 import ChainableUndefined
 

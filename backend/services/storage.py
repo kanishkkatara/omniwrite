@@ -8,18 +8,20 @@ Provides:
 - JobStore: job lifecycle management
 - get_engine(), create_tables()
 """
+
 from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID, uuid4
 
-from sqlmodel import Field, SQLModel, select
-from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from sqlmodel import Field, SQLModel, select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ _engine: AsyncEngine | None = None
 
 
 # ── SQLModel table definitions ────────────────────────────────────────────────
+
 
 class BrandProfileTable(SQLModel, table=True):
     """Persisted brand profile record."""
@@ -36,8 +39,8 @@ class BrandProfileTable(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(index=True)
     data_json: str = Field(default="{}")  # Serialised BrandProfile JSON
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class JobTable(SQLModel, table=True):
@@ -52,11 +55,12 @@ class JobTable(SQLModel, table=True):
     outputs_json: str = Field(default="{}")
     state_json: str = Field(default="{}")  # Full AgentState snapshot
     error: str | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # ── Engine setup ──────────────────────────────────────────────────────────────
+
 
 def get_engine() -> AsyncEngine:
     """Return the singleton async engine, creating it if needed."""
@@ -84,14 +88,13 @@ async def create_tables() -> None:
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Async context manager for database sessions."""
     engine = get_engine()
-    async_session_factory = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    async_session_factory = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session_factory() as session:  # type: ignore[attr-defined]
         yield session
 
 
 # ── BrandStore ────────────────────────────────────────────────────────────────
+
 
 class BrandStore:
     """CRUD operations for brand profiles."""
@@ -131,7 +134,7 @@ class BrandStore:
             existing.update(updates)
             record.data_json = json.dumps(existing)
             record.name = existing.get("name", record.name)
-            record.updated_at = datetime.now(timezone.utc)
+            record.updated_at = datetime.now(UTC)
             session.add(record)
             await session.commit()
             await session.refresh(record)
@@ -149,6 +152,7 @@ class BrandStore:
 
 
 # ── JobStore ──────────────────────────────────────────────────────────────────
+
 
 class JobStore:
     """Job lifecycle management."""
@@ -183,7 +187,7 @@ class JobStore:
             if job:
                 job.status = status
                 job.error = error
-                job.updated_at = datetime.now(timezone.utc)
+                job.updated_at = datetime.now(UTC)
                 session.add(job)
                 await session.commit()
 
@@ -200,7 +204,7 @@ class JobStore:
                 job.outputs_json = json.dumps(outputs)
                 if state_snapshot:
                     job.state_json = json.dumps(state_snapshot)
-                job.updated_at = datetime.now(timezone.utc)
+                job.updated_at = datetime.now(UTC)
                 session.add(job)
                 await session.commit()
 
@@ -210,7 +214,7 @@ class JobStore:
             job = await session.get(JobTable, job_id)
             if job:
                 job.state_json = json.dumps(state_snapshot, default=str)
-                job.updated_at = datetime.now(timezone.utc)
+                job.updated_at = datetime.now(UTC)
                 session.add(job)
                 await session.commit()
 

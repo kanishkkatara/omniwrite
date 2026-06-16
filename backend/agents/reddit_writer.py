@@ -4,6 +4,7 @@ Reddit Writer Agent.
 Uses RedditPlugin to generate a Reddit post and stores the result
 in state.outputs["reddit"].
 """
+
 from __future__ import annotations
 
 import logging
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 _plugin = RedditPlugin()
 
 
-async def write_reddit(state: "AgentState", settings: "Settings") -> "AgentState":
+async def write_reddit(state: AgentState, settings: Settings) -> AgentState:
     """
     Generate a Reddit post and store it in state.outputs["reddit"].
 

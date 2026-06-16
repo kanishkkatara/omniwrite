@@ -6,6 +6,7 @@ Generates long-form, SEO-optimised Markdown blog posts with:
 - H2/H3-structured body sections
 - Conclusion + CTA
 """
+
 from __future__ import annotations
 
 import logging
@@ -31,8 +32,10 @@ class BlogPlugin(PlatformPlugin):
     max_words = 3000
     supports_publish = False
 
-    def get_system_prompt(self, brand: "BrandProfile | None") -> str:
-        brand_context = brand.to_prompt_context() if brand else "No specific brand profile provided."
+    def get_system_prompt(self, brand: BrandProfile | None) -> str:
+        brand_context = (
+            brand.to_prompt_context() if brand else "No specific brand profile provided."
+        )
         return f"""You are an expert long-form content writer and SEO strategist.
 
 Your role:
@@ -57,7 +60,7 @@ Formatting rules:
 
 Output the blog post ONLY — no preamble or meta-commentary."""
 
-    async def generate(self, state: "AgentState", settings: "Settings") -> str:  # noqa: C901
+    async def generate(self, state: AgentState, settings: Settings) -> str:  # noqa: C901
         request = state.request
         brief = state.brief
         strategy = state.strategy
@@ -70,7 +73,11 @@ Output the blog post ONLY — no preamble or meta-commentary."""
         length = request.length.value if request else "medium"
 
         # Length guidance
-        length_map = {"short": "600–900 words", "medium": "1000–1400 words", "long": "1800–2500 words"}
+        length_map = {
+            "short": "600–900 words",
+            "medium": "1000–1400 words",
+            "long": "1800–2500 words",
+        }
         length_guide = length_map.get(length, "1000–1400 words")
 
         primary_angle = strategy.primary_angle if strategy else ""

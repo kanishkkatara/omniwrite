@@ -11,6 +11,7 @@ Usage:
     registry.discover([Path("backend/plugins")])
     plugin = registry.get("blog")
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -29,18 +30,18 @@ class PluginRegistry:
     """Registry of available platform plugins."""
 
     def __init__(self) -> None:
-        self._plugins: dict[str, "PlatformPlugin"] = {}
+        self._plugins: dict[str, PlatformPlugin] = {}
 
-    def register(self, plugin: "PlatformPlugin") -> None:
+    def register(self, plugin: PlatformPlugin) -> None:
         """Register a plugin instance under its name."""
         self._plugins[plugin.name] = plugin
         logger.debug("Registered plugin: %s (%s)", plugin.name, plugin.display_name)
 
-    def get(self, name: str) -> "PlatformPlugin | None":
+    def get(self, name: str) -> PlatformPlugin | None:
         """Return the plugin with the given name, or None if not found."""
         return self._plugins.get(name)
 
-    def list_plugins(self) -> list["PlatformPlugin"]:
+    def list_plugins(self) -> list[PlatformPlugin]:
         """Return all registered plugins."""
         return list(self._plugins.values())
 

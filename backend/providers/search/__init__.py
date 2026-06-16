@@ -4,6 +4,7 @@ Search providers package for omniwrite.
 Exports `get_search_provider()` which selects the best available provider
 based on configured API keys: Tavily > Brave > DuckDuckGo (free fallback).
 """
+
 from __future__ import annotations
 
 import logging
@@ -34,7 +35,7 @@ _PROVIDER_PRIORITY: list[type[SearchProvider]] = [
 ]
 
 
-def get_search_provider(settings: "Settings") -> SearchProvider:
+def get_search_provider(settings: Settings) -> SearchProvider:
     """
     Return the best available search provider given the current settings.
 

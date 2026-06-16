@@ -6,6 +6,7 @@ Provides:
 - Request ID injection (X-Request-ID header)
 - Basic in-memory rate limiting (10 req/min per IP)
 """
+
 from __future__ import annotations
 
 import time
@@ -16,7 +17,6 @@ from typing import TYPE_CHECKING
 from fastapi import Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.types import ASGIApp
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -25,8 +25,8 @@ if TYPE_CHECKING:
 # ── Rate limiter state ────────────────────────────────────────────────────────
 
 _rate_store: dict[str, list[float]] = defaultdict(list)
-_RATE_LIMIT = 60       # requests
-_RATE_WINDOW = 60.0    # seconds
+_RATE_LIMIT = 60  # requests
+_RATE_WINDOW = 60.0  # seconds
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -57,9 +57,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         now = time.time()
 
         # Prune old timestamps
-        _rate_store[client_ip] = [
-            ts for ts in _rate_store[client_ip] if now - ts < _RATE_WINDOW
-        ]
+        _rate_store[client_ip] = [ts for ts in _rate_store[client_ip] if now - ts < _RATE_WINDOW]
 
         if len(_rate_store[client_ip]) >= _RATE_LIMIT:
             return Response(
@@ -73,7 +71,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-def setup_middleware(app: "FastAPI") -> None:
+def setup_middleware(app: FastAPI) -> None:
     """
     Register all middleware on the FastAPI app.
 
