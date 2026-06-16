@@ -79,6 +79,8 @@ class GenerateRequest(BaseModel):
 
     # Advanced
     model_mode: ModelMode = ModelMode.TEST
+    test_model: str | None = Field(default=None, description="Custom model name override for TEST mode")
+    production_model: str | None = Field(default=None, description="Custom model name override for PRODUCTION mode")
     creativity: float = Field(default=0.7, ge=0.0, le=1.0, description="Maps to temperature")
     skip_research: bool = Field(default=False, description="Skip web research, use brief only")
     skip_outline_approval: bool = Field(

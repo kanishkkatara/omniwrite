@@ -107,6 +107,13 @@ class JobService:
         from backend.agents.graph import create_graph  # noqa: PLC0415
 
         settings = get_settings()
+        if request.test_model or request.production_model:
+            settings = settings.model_copy()
+            settings.models = dict(settings.models)
+            if request.test_model:
+                settings.models["test"] = settings.models["test"].model_copy(update={"model": request.test_model})
+            if request.production_model:
+                settings.models["production"] = settings.models["production"].model_copy(update={"model": request.production_model})
         job_id_str = str(job_id)
 
         # Initialise SSE queue
@@ -389,6 +396,13 @@ class JobService:
 
         settings = get_settings()
         request = GenerateRequest(**request_data)
+        if request.test_model or request.production_model:
+            settings = settings.model_copy()
+            settings.models = dict(settings.models)
+            if request.test_model:
+                settings.models["test"] = settings.models["test"].model_copy(update={"model": request.test_model})
+            if request.production_model:
+                settings.models["production"] = settings.models["production"].model_copy(update={"model": request.production_model})
 
         async def _regen():
             try:

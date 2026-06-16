@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import styles from "./BrandSidebar.module.css";
 import { OnboardingWizardWithProvider } from "./OnboardingWizard";
-import { GenerationSettings } from "@/components/settings/GenerationSettings";
 import { useBrandStore } from "@/lib/brandStore";
 import { useGenerationStore } from "@/lib/generationStore";
 import { ChevronDown, Sparkles, Building2, Settings2, PlusCircle, PenTool, Globe, Tag } from "lucide-react";
@@ -31,12 +30,25 @@ function brandInitials(name: string): string {
 }
 
 export function BrandSidebar() {
-  const { brands, activeBrandId, setActiveBrand, fetchBrands, getActiveBrand } = useBrandStore();
-  const { reset } = useGenerationStore();
+  const {
+    brands,
+    activeBrandId,
+    setActiveBrand,
+    fetchBrands,
+    getActiveBrand,
+    setIsWizardOpen,
+  } = useBrandStore();
+  const {
+    reset,
+    platforms,
+    contentLength,
+    modelMode,
+    testModel,
+    productionModel,
+    setIsConfigModalOpen,
+  } = useGenerationStore();
 
   const [brandOpen, setBrandOpen] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(true);
-  const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
     fetchBrands();
@@ -51,27 +63,19 @@ export function BrandSidebar() {
   return (
     <ToastProvider>
       <div className={styles.sidebar}>
-        {/* Header */}
-        <div className={styles.header}>
-          <div className={styles.logoArea}>
-            <div className={styles.logoMark}>✦</div>
-            <span className={styles.appName}>OmniWrite</span>
-          </div>
-
-          {/* Brand Selector */}
-          <div className={styles.brandSelector}>
-            <span className={styles.brandSelectorLabel}>Active Brand Profile</span>
-            <select
-              className={styles.brandSelect}
-              value={activeBrandId ?? ""}
-              onChange={(e) => setActiveBrand(e.target.value || null)}
-            >
-              <option value="">— No active brand —</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
+        {/* Brand Selector */}
+        <div className={styles.brandSelectorSection}>
+          <span className={styles.brandSelectorLabel}>Active Brand Profile</span>
+          <select
+            className={styles.brandSelect}
+            value={activeBrandId ?? ""}
+            onChange={(e) => setActiveBrand(e.target.value || null)}
+          >
+            <option value="">— No active brand —</option>
+            {brands.map((b) => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
         </div>
 
         {/* Scrollable sections */}
@@ -128,7 +132,7 @@ export function BrandSidebar() {
                     <button
                       className="btn-ghost"
                       style={{ width: "100%", marginTop: "8px", fontSize: "12px", padding: "6px" }}
-                      onClick={() => setShowWizard(true)}
+                      onClick={() => setIsWizardOpen(true)}
                     >
                       Configure Brand Details
                     </button>
@@ -141,7 +145,7 @@ export function BrandSidebar() {
                     <button
                       className="btn-primary"
                       style={{ width: "100%", fontSize: "12px", padding: "8px" }}
-                      onClick={() => setShowWizard(true)}
+                      onClick={() => setIsWizardOpen(true)}
                     >
                       <PlusCircle size={14} /> Connect a Brand
                     </button>
@@ -151,27 +155,67 @@ export function BrandSidebar() {
             )}
           </div>
 
-          {/* Generation Settings section */}
+          {/* Generation Settings section (Refactored to summary preview card) */}
           <div className={styles.section}>
-            <button
-              className={styles.sectionHeader}
-              onClick={() => setSettingsOpen((v) => !v)}
-              aria-expanded={settingsOpen}
-            >
+            <div className={styles.sectionHeaderNoToggle}>
               <span className={styles.sectionHeaderLeft}>
                 <Settings2 size={14} color="var(--color-text-secondary)" />
                 <span className={styles.sectionTitle}>Generation Settings</span>
               </span>
-              <ChevronDown
-                size={14}
-                className={`${styles.chevron} ${settingsOpen ? styles.chevronOpen : ""}`}
-              />
-            </button>
-            {settingsOpen && (
-              <div className={styles.sectionBody}>
-                <GenerationSettings />
+            </div>
+            <div className={styles.sectionBody} style={{ paddingTop: "12px" }}>
+              <div className={styles.configSummaryCard}>
+                <div className={styles.summaryItem}>
+                  <span className={styles.summaryLabel}>Channels</span>
+                  <div className={styles.summaryPlatformBadges}>
+                    {platforms.length > 0 ? (
+                      platforms.map((p) => (
+                        <span key={p} className={styles.summaryBadge}>
+                          {p === "blog"
+                            ? "📝 Blog"
+                            : p === "reddit"
+                            ? "🤖 Reddit"
+                            : p === "linkedin"
+                            ? "💼 LinkedIn"
+                            : "💬 Comment"}
+                        </span>
+                      ))
+                    ) : (
+                      <span className={styles.summaryNoConfig}>None selected</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.summaryRow}>
+                  <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Length</span>
+                    <span className={styles.summaryVal}>{contentLength}</span>
+                  </div>
+                  <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Model Mode</span>
+                    <span className={styles.summaryVal} style={{ textTransform: "none" }}>
+                      {modelMode === "test" ? (
+                        <span style={{ color: "var(--color-accent)", fontWeight: 600 }}>
+                          TEST ({testModel.replace("openai/", "").replace("anthropic/", "").replace("google/", "").replace("groq/", "")})
+                        </span>
+                      ) : (
+                        <span style={{ color: "var(--color-primary-light)", fontWeight: 600 }}>
+                          PROD ({productionModel.replace("openai/", "").replace("anthropic/", "").replace("google/", "").replace("groq/", "")})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.editConfigBtn}
+                  onClick={() => setIsConfigModalOpen(true)}
+                >
+                  Configure Pipeline
+                </button>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -182,11 +226,6 @@ export function BrandSidebar() {
             New Generation
           </button>
         </div>
-
-        {/* Onboarding Wizard Overlay */}
-        {showWizard && (
-          <OnboardingWizardWithProvider onClose={() => { setShowWizard(false); fetchBrands(); }} />
-        )}
       </div>
     </ToastProvider>
   );

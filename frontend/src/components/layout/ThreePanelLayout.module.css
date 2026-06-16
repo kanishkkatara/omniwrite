@@ -1,7 +1,102 @@
+.appContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.appHeader {
+  height: 50px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  z-index: 10;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.logoMark {
+  font-size: var(--font-size-md);
+  color: var(--color-primary);
+  text-shadow: 0 0 6px rgba(26, 137, 23, 0.4);
+  animation: spin 6s linear infinite;
+  display: inline-block;
+}
+
+.logoText {
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: var(--font-size-md);
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.versionBadge {
+  font-size: 10px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-family: monospace;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  background: rgba(26, 137, 23, 0.05);
+  border: 1px solid rgba(26, 137, 23, 0.15);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.statusDotActive {
+  width: 6px;
+  height: 6px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--color-primary-light);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.headerLink {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: var(--transition-fast);
+}
+
+.headerLink:hover {
+  color: var(--color-text);
+}
+
 .layout {
   display: grid;
   grid-template-columns: 280px 1fr 420px;
-  height: 100vh;
+  height: calc(100vh - 50px);
   width: 100vw;
   overflow: hidden;
   background: #ffffff;
@@ -11,7 +106,7 @@
 .leftPanel {
   position: relative;
   z-index: 1;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   border-right: 1px solid var(--color-border);
@@ -23,7 +118,7 @@
 .centerPanel {
   position: relative;
   z-index: 1;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -33,7 +128,7 @@
 .rightPanel {
   position: relative;
   z-index: 1;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   border-left: 1px solid var(--color-border);
@@ -67,13 +162,14 @@
   .layout {
     grid-template-columns: 1fr;
     position: relative;
+    height: calc(100vh - 50px);
   }
 
   .leftPanel,
   .rightPanel {
     position: fixed;
-    top: 0;
-    height: 100vh;
+    top: 50px;
+    height: calc(100vh - 50px);
     width: 280px;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 50;
@@ -109,7 +205,7 @@
 
   .backdrop {
     position: fixed;
-    inset: 0;
+    inset: 50px 0 0 0;
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(4px);
     z-index: 40;

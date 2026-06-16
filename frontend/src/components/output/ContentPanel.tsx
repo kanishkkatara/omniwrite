@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./ContentPanel.module.css";
 import { useGenerationStore } from "@/lib/generationStore";
 import { regeneratePlatform } from "@/lib/api";
@@ -14,8 +14,8 @@ export function ContentPanel() {
     currentJobId,
     outputs,
     costSummary,
-    jobStatus,
     setOutput,
+    platforms: selectedPlatforms,
   } = useGenerationStore();
 
   const [activeTab, setActiveTab] = useState<Platform>(Platform.Blog);
@@ -23,6 +23,25 @@ export function ContentPanel() {
   const [feedback, setFeedback] = useState("");
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [showFeedbackInput, setShowFeedbackInput] = useState(false);
+
+  const allPlatforms = [
+    { label: "Blog Post", value: Platform.Blog },
+    { label: "Reddit Adapt", value: Platform.Reddit },
+    { label: "LinkedIn Post", value: Platform.LinkedIn },
+    { label: "First Comment", value: Platform.LinkedInComment },
+  ];
+
+  // Filter tabs to show only what is configured in settings or already generated
+  const visiblePlatforms = allPlatforms.filter(
+    (p) => selectedPlatforms.includes(p.value) || outputs.some((o) => o.platform === p.value)
+  );
+
+  // Keep activeTab pointing to a valid visible tab
+  useEffect(() => {
+    if (visiblePlatforms.length > 0 && !visiblePlatforms.some((vp) => vp.value === activeTab)) {
+      setActiveTab(visiblePlatforms[0].value);
+    }
+  }, [visiblePlatforms, activeTab]);
 
   const activeOutput = outputs.find((o) => o.platform === activeTab);
 
@@ -45,9 +64,7 @@ export function ContentPanel() {
       setShowFeedbackInput(false);
       setFeedback("");
       
-      // Since regenerate runs in background on API, we mock an update
-      // or we can poll for updates.
-      // For instant response we tell the user it is regenerating
+      // Update store state with placeholder while background agents work
       setOutput({
         platform: activeTab,
         content: "*Regenerating content based on feedback... Please wait.*",
@@ -60,13 +77,6 @@ export function ContentPanel() {
   };
 
   const hasOutputs = outputs.length > 0;
-
-  const platforms = [
-    { label: "Blog Post", value: Platform.Blog },
-    { label: "Reddit Writeup", value: Platform.Reddit },
-    { label: "LinkedIn Post", value: Platform.LinkedIn },
-    { label: "First Comment", value: Platform.LinkedInComment },
-  ];
 
   return (
     <div className={styles.panel}>
@@ -86,9 +96,9 @@ export function ContentPanel() {
         </div>
       ) : (
         <>
-          {/* Tabs */}
+          {/* Tabs list */}
           <div className={styles.tabsList}>
-            {platforms.map((p) => {
+            {visiblePlatforms.map((p) => {
               const hasContent = outputs.some((o) => o.platform === p.value);
               return (
                 <button
@@ -109,7 +119,7 @@ export function ContentPanel() {
             })}
           </div>
 
-          {/* Body Viewer */}
+          {/* Tab Content body */}
           <div className={styles.scrollArea}>
             <div className={styles.toolbar}>
               <button

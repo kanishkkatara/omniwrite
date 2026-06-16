@@ -15,11 +15,6 @@ export function useJobStream(jobId: string | null) {
     setCost,
     setIsStreaming,
     setError,
-    steps,
-    outputs,
-    outline,
-    costSummary,
-    jobStatus,
   } = useGenerationStore();
 
   const handleEvent = useCallback(
@@ -87,14 +82,12 @@ export function useJobStream(jobId: string | null) {
 
     let cleanup: (() => void) | null = null;
     let pollInterval: ReturnType<typeof setInterval> | null = null;
-    let sseWorking = false;
 
     // Try SSE first
     try {
       cleanup = streamJobEvents(
         jobId,
         (event) => {
-          sseWorking = true;
           handleEvent(event);
         },
         () => {
@@ -140,6 +133,4 @@ export function useJobStream(jobId: string | null) {
       if (pollInterval) clearInterval(pollInterval);
     };
   }, [jobId, handleEvent, updateStep, setOutline, setOutput, setStatus, setCost, setIsStreaming, setError]);
-
-  return { steps, outputs, outline, costSummary, jobStatus };
 }

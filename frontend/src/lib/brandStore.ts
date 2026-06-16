@@ -8,6 +8,7 @@ interface BrandState {
   activeBrandId: string | null;
   isLoading: boolean;
   error: string | null;
+  isWizardOpen: boolean;
 }
 
 interface BrandActions {
@@ -17,6 +18,7 @@ interface BrandActions {
   updateBrand: (id: string, data: BrandProfileUpdate) => Promise<BrandProfile>;
   deleteBrand: (id: string) => Promise<void>;
   getActiveBrand: () => BrandProfile | null;
+  setIsWizardOpen: (open: boolean) => void;
 }
 
 type BrandStore = BrandState & BrandActions;
@@ -28,6 +30,7 @@ export const useBrandStore = create<BrandStore>()(
       activeBrandId: null,
       isLoading: false,
       error: null,
+      isWizardOpen: false,
 
       fetchBrands: async () => {
         set({ isLoading: true, error: null });
@@ -105,6 +108,10 @@ export const useBrandStore = create<BrandStore>()(
       getActiveBrand: () => {
         const { brands, activeBrandId } = get();
         return brands.find((b) => b.id === activeBrandId) ?? null;
+      },
+
+      setIsWizardOpen: (open) => {
+        set({ isWizardOpen: open });
       },
     }),
     {

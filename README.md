@@ -18,6 +18,8 @@ Give it a topic. Get a long-form blog post, a platform-native Reddit writeup, a 
 - **🧩 Plugin architecture** — add new platforms (Medium, Substack, Twitter) by dropping a single file
 - **📝 External YAML prompts** — edit prompts without touching Python code
 - **💬 Chat interface** — agent-led conversation with outline approval before writing
+- **⚙️ Pipeline Configuration** — spacious settings dashboard overlay to tune platforms, SEO tags, variants, and toggle deep research
+- **🧠 Custom Model Selector** — choose from popular LLM presets (GPT-4o, Claude 3.5 Sonnet, Gemini Pro/Flash, Llama 3) or type custom model names directly in the UI
 - **🏷️ Brand DNA** — voice, audience, perspective, avoid-lists injected into every generation
 - **🚀 Auto-publish** — Ghost, Hashnode, WordPress, Dev.to, Notion out of the box
 - **💰 Cost tracking** — per-generation token usage and USD cost breakdown
@@ -34,7 +36,7 @@ Give it a topic. Get a long-form blog post, a platform-native Reddit writeup, a 
 ### Option 1 — Docker (Recommended)
 
 ```bash
-git clone https://github.com/your-org/omniwrite
+git clone https://github.com/kanishkkatara/omniwrite
 cd omniwrite
 cp .env.example .env          # add your API keys
 cp config.example.yaml config.yaml
@@ -47,7 +49,7 @@ open http://localhost:3000
 ```bash
 # Prerequisites: Python 3.11+, Node 18+, uv
 
-git clone https://github.com/your-org/omniwrite
+git clone https://github.com/kanishkkatara/omniwrite
 cd omniwrite
 cp .env.example .env
 cp config.example.yaml config.yaml

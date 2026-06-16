@@ -45,6 +45,8 @@ export interface GenerateRequest {
   platforms: Platform[];
   content_length?: ContentLength;
   model_mode?: ModelMode;
+  test_model?: string;
+  production_model?: string;
   seo_keywords?: string[];
   reading_level?: ReadingLevel;
   cta_type?: CtaType;

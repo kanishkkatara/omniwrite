@@ -1,147 +1,234 @@
-.wrapper {
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  animation: fadeIn 0.3s ease;
-}
-
-.progressBar {
-  height: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-  margin-bottom: 14px;
-}
-
-.progressFill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  border-radius: var(--radius-full);
-  transition: width 0.5s ease;
-  box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
-}
-
-.steps {
+.terminal {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.step {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 8px 10px;
-  border-radius: var(--radius-md);
-  transition: var(--transition-fast);
-}
-
-.stepRunning {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
-.stepDone {
-  opacity: 0.7;
-}
-
-.stepError {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.stepPending {
-  opacity: 0.45;
-}
-
-.statusIcon {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.statusDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(99, 102, 241, 0.3);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-.spinnerGlow {
-  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6));
-}
-
-.checkIcon {
-  color: var(--color-success-light);
-  animation: fadeInScale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.errorIcon {
-  color: var(--color-error);
-}
-
-.stepContent {
-  flex: 1;
-  min-width: 0;
-}
-
-.stepName {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.stepMessage {
-  font-size: var(--font-size-xs);
-  color: var(--color-muted);
-  margin-top: 2px;
-  white-space: nowrap;
+  background: #111215;
+  border: 1px solid #2a2c33;
+  border-radius: 6px;
   overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.currentMessage {
-  margin-top: 12px;
-  padding: 10px 12px;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  line-height: 1.5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  margin: 16px 0;
   animation: fadeIn 0.25s ease;
 }
 
-.header {
+/* Title bar */
+.titleBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: #18191e;
+  border-bottom: 1px solid #20222a;
+  user-select: none;
 }
 
-.title {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  color: var(--color-muted);
-  letter-spacing: 0.08em;
+.windowButtons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.red {
+  background: #ff5f56;
+}
+
+.yellow {
+  background: #ffbd2e;
+}
+
+.green {
+  background: #27c93f;
+}
+
+.consoleTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: Menlo, Monaco, Consolas, "Fira Code", monospace;
+  font-size: 11px;
+  color: #a0a5b5;
+  font-weight: 500;
+}
+
+.terminalIcon {
+  color: #1a8917;
+}
+
+.toggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid #323542;
+  border-radius: 4px;
+  color: #a0a5b5;
+  font-size: 10px;
+  padding: 3px 6px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.15s ease;
+}
+
+.toggleBtn:hover {
+  background: #20222a;
+  border-color: #4a4f63;
+  color: #ffffff;
+}
+
+/* Console Body */
+.consoleBody {
+  padding: 14px 16px;
+  font-family: Menlo, Monaco, Consolas, "Fira Code", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #d1d5db;
+  text-align: left;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #0d0e11;
+}
+
+.asciiProgressLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.prompt {
+  color: #1a8917;
+  font-weight: bold;
+}
+
+.logText {
+  color: #ffffff;
+}
+
+.progressBarLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #7d8396;
+}
+
+.barLabel {
+  color: #a0a5b5;
+}
+
+.bar {
+  color: #1a8917;
+  letter-spacing: 0.05em;
+  font-weight: bold;
+}
+
+.pct {
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.count {
+  font-size: 11px;
+  color: #7d8396;
+}
+
+.divider {
+  height: 1px;
+  background: #1d1f27;
+  margin: 10px 0;
+}
+
+/* Logs */
+.logs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.logLine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.timestamp {
+  color: #535661;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  font-weight: bold;
+  font-size: 11px;
+  padding: 0 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
   text-transform: uppercase;
 }
 
-.stepCount {
-  font-size: var(--font-size-xs);
-  color: var(--color-muted);
+.info {
+  color: #5c8df6;
+}
+
+.running {
+  color: #ffc83c;
+  animation: pulseText 1.5s infinite ease-in-out;
+}
+
+.success {
+  color: #39e673;
+}
+
+.failed {
+  color: #ff5f56;
+}
+
+.waiting {
+  color: #7d8396;
+}
+
+.stepName {
+  color: #a0a5b5;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.message {
+  color: #ffffff;
+}
+
+/* Pulse Prompt cursor */
+.cursorLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.promptSymbol {
+  color: #1a8917;
+  font-weight: bold;
+}
+
+.pulseCursor {
+  color: #1a8917;
+  font-weight: bold;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulseText {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
 }

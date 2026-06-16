@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import styles from "./GenerationSettings.module.css";
 import { ModelToggle } from "./ModelToggle";
 import { TagsInput } from "@/components/ui/TagsInput";
+import { useGenerationStore } from "@/lib/generationStore";
 import {
   Platform,
   ContentLength,
@@ -11,46 +12,6 @@ import {
   ReadingLevel,
   CtaType,
 } from "@/types/generation";
-
-// We expose a way for ChatInterface to read these settings
-// using a simple module-level singleton store approach
-export interface GenerationConfig {
-  platforms: Platform[];
-  contentLength: ContentLength;
-  modelMode: ModelMode;
-  seoKeywords: string[];
-  readingLevel: ReadingLevel;
-  ctaType: CtaType;
-  subreddit: string;
-  includeResearch: boolean;
-  creativity: number;
-  variants: number;
-}
-
-// Module-level singleton for settings (shared without context overhead)
-let _config: GenerationConfig = {
-  platforms: [Platform.Blog, Platform.LinkedIn],
-  contentLength: ContentLength.Medium,
-  modelMode: ModelMode.Test,
-  seoKeywords: [],
-  readingLevel: ReadingLevel.Intermediate,
-  ctaType: CtaType.None,
-  subreddit: "",
-  includeResearch: true,
-  creativity: 50,
-  variants: 1,
-};
-
-let _listeners: Array<() => void> = [];
-
-export function getGenerationConfig(): GenerationConfig {
-  return _config;
-}
-
-export function subscribeGenerationConfig(cb: () => void) {
-  _listeners.push(cb);
-  return () => { _listeners = _listeners.filter((l) => l !== cb); };
-}
 
 const PLATFORM_OPTIONS = [
   { value: Platform.Blog, label: "Blog", icon: "📝" },
@@ -66,31 +27,25 @@ const LENGTH_LABELS = {
 };
 
 export function GenerationSettings() {
-  const [platforms, setPlatforms] = useState<Platform[]>(_config.platforms);
-  const [contentLength, setContentLength] = useState<ContentLength>(_config.contentLength);
-  const [modelMode, setModelMode] = useState<ModelMode>(_config.modelMode);
-  const [seoKeywords, setSeoKeywords] = useState<string[]>(_config.seoKeywords);
-  const [readingLevel, setReadingLevel] = useState<ReadingLevel>(_config.readingLevel);
-  const [ctaType, setCtaType] = useState<CtaType>(_config.ctaType);
-  const [subreddit, setSubreddit] = useState<string>(_config.subreddit);
-  const [includeResearch, setIncludeResearch] = useState<boolean>(_config.includeResearch);
-  const [creativity, setCreativity] = useState<number>(_config.creativity);
-  const [variants, setVariants] = useState<number>(_config.variants);
-
-  const update = useCallback(<K extends keyof GenerationConfig>(
-    key: K,
-    value: GenerationConfig[K]
-  ) => {
-    _config = { ..._config, [key]: value };
-    _listeners.forEach((l) => l());
-  }, []);
+  const {
+    platforms,
+    contentLength,
+    modelMode,
+    seoKeywords,
+    readingLevel,
+    ctaType,
+    subreddit,
+    includeResearch,
+    creativity,
+    variants,
+    setConfigValue,
+  } = useGenerationStore();
 
   const togglePlatform = (p: Platform) => {
     const next = platforms.includes(p)
       ? platforms.filter((x) => x !== p)
       : [...platforms, p];
-    setPlatforms(next);
-    update("platforms", next);
+    setConfigValue("platforms", next);
   };
 
   const lengthValue =
@@ -134,8 +89,7 @@ export function GenerationSettings() {
             value={lengthValue}
             onChange={(e) => {
               const v = lengthOptions[parseInt(e.target.value)];
-              setContentLength(v);
-              update("contentLength", v);
+              setConfigValue("contentLength", v);
             }}
           />
           <div className={styles.sliderLabels}>
@@ -151,7 +105,7 @@ export function GenerationSettings() {
         <label className={styles.label}>SEO Keywords</label>
         <TagsInput
           tags={seoKeywords}
-          onChange={(tags) => { setSeoKeywords(tags); update("seoKeywords", tags); }}
+          onChange={(tags) => setConfigValue("seoKeywords", tags)}
           placeholder="content marketing, AI tools…"
         />
       </div>
@@ -162,11 +116,7 @@ export function GenerationSettings() {
         <select
           className="select"
           value={readingLevel}
-          onChange={(e) => {
-            const v = e.target.value as ReadingLevel;
-            setReadingLevel(v);
-            update("readingLevel", v);
-          }}
+          onChange={(e) => setConfigValue("readingLevel", e.target.value as ReadingLevel)}
         >
           <option value={ReadingLevel.Beginner}>Beginner</option>
           <option value={ReadingLevel.Intermediate}>Intermediate</option>
@@ -180,11 +130,7 @@ export function GenerationSettings() {
         <select
           className="select"
           value={ctaType}
-          onChange={(e) => {
-            const v = e.target.value as CtaType;
-            setCtaType(v);
-            update("ctaType", v);
-          }}
+          onChange={(e) => setConfigValue("ctaType", e.target.value as CtaType)}
         >
           <option value={CtaType.None}>No CTA</option>
           <option value={CtaType.Subscribe}>Subscribe</option>
@@ -202,7 +148,7 @@ export function GenerationSettings() {
           <input
             className="input"
             value={subreddit}
-            onChange={(e) => { setSubreddit(e.target.value); update("subreddit", e.target.value); }}
+            onChange={(e) => setConfigValue("subreddit", e.target.value)}
             placeholder="r/startups"
           />
         </div>
@@ -219,10 +165,7 @@ export function GenerationSettings() {
             type="checkbox"
             className={styles.toggleInput}
             checked={includeResearch}
-            onChange={(e) => {
-              setIncludeResearch(e.target.checked);
-              update("includeResearch", e.target.checked);
-            }}
+            onChange={(e) => setConfigValue("includeResearch", e.target.checked)}
           />
           <span className={styles.toggleSlider} />
         </label>
@@ -239,11 +182,7 @@ export function GenerationSettings() {
             className={styles.slider}
             min={0} max={100} step={10}
             value={creativity}
-            onChange={(e) => {
-              const v = parseInt(e.target.value);
-              setCreativity(v);
-              update("creativity", v);
-            }}
+            onChange={(e) => setConfigValue("creativity", parseInt(e.target.value))}
           />
           <div className={styles.sliderLabels}>
             <span className={styles.sliderLabel}>Conservative</span>
@@ -260,11 +199,7 @@ export function GenerationSettings() {
           className={styles.numberInput}
           min={1} max={5}
           value={variants}
-          onChange={(e) => {
-            const v = Math.max(1, Math.min(5, parseInt(e.target.value) || 1));
-            setVariants(v);
-            update("variants", v);
-          }}
+          onChange={(e) => setConfigValue("variants", Math.max(1, Math.min(5, parseInt(e.target.value) || 1)))}
         />
       </div>
 
@@ -274,7 +209,7 @@ export function GenerationSettings() {
       {/* Model Toggle */}
       <ModelToggle
         value={modelMode}
-        onChange={(mode) => { setModelMode(mode); update("modelMode", mode); }}
+        onChange={(mode) => setConfigValue("modelMode", mode)}
       />
     </div>
   );

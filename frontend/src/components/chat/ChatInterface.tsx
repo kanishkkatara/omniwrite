@@ -7,7 +7,7 @@ import { useJobStream } from "@/lib/hooks/useJobStream";
 import { ChatMessage, Message } from "./ChatMessage";
 import { AgentProgress } from "./AgentProgress";
 import { OutlineApproval } from "./OutlineApproval";
-import { ArrowUp, Sparkles, Clipboard, Check } from "lucide-react";
+import { ArrowUp, Sparkles } from "lucide-react";
 import { JobStatus } from "@/types/generation";
 
 export function ChatInterface() {
@@ -18,9 +18,13 @@ export function ChatInterface() {
     isStreaming,
     error,
     jobStatus,
+    steps,
+    outline,
+    setTopic,
   } = useGenerationStore();
 
-  const { steps, outline } = useJobStream(currentJobId);
+  // Connect job stream side effect (writes directly to the store)
+  useJobStream(currentJobId);
 
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -49,11 +53,12 @@ export function ChatInterface() {
     const originalInput = input;
     setInput("");
 
+    // Set topic in Zustand store
+    setTopic(originalInput);
+
     try {
-      const jobId = await startJob({
-        topic: originalInput,
-        platforms: ["blog", "linkedin", "reddit", "linkedin_comment"] as any,
-      });
+      // Trigger decoupled job generation
+      await startJob();
 
       const agentInitMessage: Message = {
         id: Math.random().toString(),
